@@ -1,19 +1,25 @@
+use rand::Rng;
+use rayon::prelude::*;
 
+pub mod eq;
+pub mod le;
+pub mod stream;
+pub mod utils;
 
-fn build_params(op_id: usize) -> usize, usize, usize {
-    if op_id == 1 {
-        let keylen = 1304;
-        let n_aes_keys = 4;
-    }
-    else {
-        let keylen = 1304;
-        let n_aes_keys = 4;
-    }
+// Byte precision and security.
+pub const N: usize = 4;
+pub const L: usize = 16;
+
+fn build_params(op_id: usize) -> (usize, usize, usize) {
+    let (keylen, n_aes_streams) = match op_id {
+        1 => (1205, 4),
+        _ => (597, 2),
+    };
 
     // TODO: small inputs
     let n_aes_keys = 128;
 
-    n_aes_keys, keylen, n_aes_streams
+    (n_aes_keys, keylen, n_aes_streams)
 }
 
 #[no_mangle]
@@ -27,18 +33,17 @@ pub unsafe extern "C" fn keygen(
     assert!(!keys_a_pointer.is_null());
     assert!(!keys_b_pointer.is_null());
 
-    let n_aes_keys, keylen, n_aes_streams = build_params(op_id);
+    let (n_aes_keys, keylen, n_aes_streams) = build_params(op_id);
 
     // Generate AES-128 keys for MMO (expansion factor 2 or 4)
     let mut rng = rand::thread_rng();
-    let aes_keys: [u128; n_aes_keys] = rng.gen();
+    let aes_keys: Vec<u128> = rng.sample_iter().take(n_aes_keys).collect();
 
     // Write the AES key to the first line of the key block.
     // The rest of the line is empty (we keep a Numpy array shape).
     for i in 0..n_aes_keys {
         utils::write_aes_key_to_raw_line(aes_keys[i], keys_a_pointer.add(L * i) as *mut u8);
         utils::write_aes_key_to_raw_line(aes_keys[i], keys_b_pointer.add(L * i) as *mut u8);
-
     }
 
     let mut key_stream_args = vec![];
@@ -70,18 +75,14 @@ pub unsafe extern "C" fn keygen(
     // Each thread will repeatedly execute this closure in parallel
     let create_keypair = |key_stream_arg: &(usize, usize, usize, usize)| -> () {
         let (stream_id, stream_length, key_a_pointer, keys_b_pointer) = *key_stream_arg;
-        if op_id == 1 {
-            le::generate_key_stream(
-                &aes_keys,
-                stream_id,
-                stream_length,
-                key_a_pointer,
-                keys_b_pointer,
-            );
-        }
-        else {
-            println!("Not implemented.")
-        }
+        stream::generate_key_stream(
+            &aes_keys,
+            stream_id,
+            stream_length,
+            key_a_pointer,
+            keys_b_pointer,
+            op_id,
+        );
     };
 
     // Force Rayon to use the number of thread provided by the user, unless a pool already exists
@@ -105,14 +106,14 @@ pub unsafe extern "C" fn eval(
     assert!(!keys_pointer.is_null());
     assert!(!results_pointer.is_null());
 
-    let n_aes_keys, keylen, n_aes_streams = build_params(op_id);
-
+    let (n_aes_keys, keylen, n_aes_streams) = build_params(op_id);
 
     // Read the AES keys from the first line of the key block.
-    let mut aes_keys = [0u128; n_aes_keys];
+    let mut aes_keys = Vec::new();
     for i in 0..n_aes_keys {
-        aes_keys[i] = utils::read_aes_key_from_raw_line(keys_pointer.add(L * i) as *mut u8);
-
+        aes_keys.push(utils::read_aes_key_from_raw_line(
+            keys_pointer.add(L * i) as *mut u8
+        ));
     }
 
     let mut key_stream_args = vec![];
@@ -145,20 +146,16 @@ pub unsafe extern "C" fn eval(
     // Each thread will repeatedly execute this closure in parallel
     let eval_key = |key_stream_arg: &(usize, usize, usize, usize, usize)| -> () {
         let (stream_id, stream_length, x_pointer, key_pointer, result_pointer) = *key_stream_arg;
-        if op_id == 1 {
-            le::eval_key_stream(
-                party_id as u8,
-                &aes_keys,
-                stream_id,
-                stream_length,
-                x_pointer,
-                key_pointer,
-                result_pointer,
-            );
-        }
-        else {
-            println!("Not implemented.")
-        }
+        stream::eval_key_stream(
+            party_id as u8,
+            &aes_keys,
+            stream_id,
+            stream_length,
+            x_pointer,
+            key_pointer,
+            result_pointer,
+            op_id,
+        );
     };
 
     // Force Rayon to use the number of thread provided by the user, unless a pool already exists

@@ -15,9 +15,9 @@ pub trait PRG {
 
     const expansion_factor: usize;
 
-    fn from_slice(&u128) -> Self;
+    fn from_slice(&[u128]) -> Self;
 
     fn expand(&mut self, seed: u128) -> [u128, usize];
 
-    // TODO: key type?
-}
+    // TODO: key type, read/write state to line
+};

@@ -10,6 +10,9 @@ readme = "README.md"
 
 [dependencies]
 maturin = "0.8.2"
+aesni = "0.10.0"
+rand = "0.7.3"
+rayon = "1.5.0"
 
 [lib]
 name = "sycret"

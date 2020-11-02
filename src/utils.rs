@@ -1,4 +1,10 @@
+use aesni::cipher::generic_array::GenericArray;
+use aesni::cipher::{BlockCipher, NewBlockCipher};
+use aesni::Aes128;
 use std::slice;
+
+use super::stream::PRG;
+use super::{L, N};
 
 pub fn bit_decomposition_u32(alpha: u32) -> Vec<u8> {
     let mut alpha_bits: Vec<u8> = Vec::new();
@@ -24,4 +30,44 @@ pub unsafe fn read_aes_key_from_raw_line(key_line_pointer: *const u8) -> u128 {
         slice::from_raw_parts(key_line_pointer, 16).as_ptr() as *const [u8; 16];
     let key: u128 = u128::from_le_bytes(*key_ptr);
     key
+}
+
+pub struct MMO {
+    // pub expansion_factor: usize,
+    pub ciphers: Vec<Aes128>,
+}
+
+impl PRG for MMO {
+    fn from_slice(aes_keys: &[u128]) -> MMO {
+        let mut ciphers = vec![];
+        for key in aes_keys {
+            ciphers.push(aesni::Aes128::new(GenericArray::from_slice(
+                &key.to_le_bytes(),
+            )));
+        }
+        MMO {
+            // expansion_factor: ciphers.len(),
+            ciphers: ciphers,
+        }
+    }
+
+    fn expand(&mut self, seed: u128) -> Vec<u128> {
+        // NOTE: to improve performance, try:
+        // - const generic instead of Vec?
+        // - inplace as much as possible, u8 rather than u128?
+        let mut output = Vec::new();
+        let mut output_array = [0u8; L];
+        let seed_slice = seed.to_le_bytes();
+        // Matyas-Meyer-Oseas with AES (ECB)
+        for cipher in self.ciphers {
+            let mut block = GenericArray::clone_from_slice(&seed_slice);
+            cipher.encrypt_block(&mut block);
+            // XOR byte by byte
+            for k in 0..L {
+                output_array[k] = block[k] ^ seed_slice[k];
+            }
+            output.push(u128::from_le_bytes(output_array));
+        }
+        output
+    }
 }
