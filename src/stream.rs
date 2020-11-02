@@ -11,14 +11,16 @@ pub trait FSSKey: Sized {
 
     unsafe fn to_raw_line(&self, raw_line_pointer: *mut u8);
 
-    fn eval(&self, prg: &impl PRG, party_id: u8, x: u32) -> u8;
+    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
 
-    fn generate_keypair(prg: &impl PRG) -> (Self, Self);
+    fn generate_keypair(prg: &mut impl PRG) -> (Self, Self);
 }
 
 // Keyed PRG
 pub trait PRG {
     fn from_slice(key: &[u128]) -> Self;
+
+    fn from_vec(key: &Vec<u128>) -> Self;
 
     // NOTE: Rust Stable does not have const generics
     // const expansion_factor: usize;
@@ -29,7 +31,7 @@ pub trait PRG {
 }
 
 pub fn generate_key_stream(
-    aes_keys: &[u128],
+    aes_keys: &Vec<u128>,
     stream_id: usize,
     stream_length: usize,
     key_a_pointer: usize,
@@ -41,25 +43,26 @@ pub fn generate_key_stream(
     let key_b_p = key_b_pointer as *mut u8;
 
     // TODO: def. Impl PRG.
-    let mut prg = MMO::from_slice(aes_keys);
+    let mut prg = MMO::from_vec(aes_keys);
 
     for line_counter in 0..stream_length {
         let (key_a, key_b) = match op_id {
-            1 => LeKey::generate_keypair(&mut prg),
-            _ => EqKey::generate_keypair(&mut prg),
+            _ => LeKey::generate_keypair(&mut prg), // _ => EqKey::generate_keypair(&mut prg),
+        };
+        let key_len = match op_id {
+            _ => LeKey::key_len,
         };
 
         unsafe {
-            // TODO: keylen?
-            &key_a.write_to_raw_line(key_a_p.add(&key_a.key_len * line_counter));
-            &key_b.write_to_raw_line(key_b_p.add(&key_b.key_len * line_counter));
+            &key_a.to_raw_line(key_a_p.add(key_len * line_counter));
+            &key_b.to_raw_line(key_b_p.add(key_len * line_counter));
         }
     }
 }
 
 pub fn eval_key_stream(
     party_id: u8,
-    aes_keys: &[u128],
+    aes_keys: &Vec<u128>,
     stream_id: usize,
     stream_length: usize,
     x_pointer: usize,
@@ -69,7 +72,7 @@ pub fn eval_key_stream(
 ) {
     assert!((party_id == 0u8) || (party_id == 1u8));
 
-    let mut prg = MMO::from_slice(aes_keys);
+    let mut prg = MMO::from_vec(aes_keys);
 
     // Read, eval, write line by line
 
@@ -84,8 +87,8 @@ pub fn eval_key_stream(
                 .as_ptr() as *const [u8; N];
             let x: u32 = u32::from_le_bytes(*x_ptr);
             let key = match op_id {
-                1 => LeKey::from_raw_line(key_pointer_p.add(LeKey::key_len * line_counter)),
-                _ => EqKey::from_raw_line(key_pointer_p.add(EqKey::key_len * line_counter)),
+                _ => LeKey::from_raw_line(key_pointer_p.add(LeKey::key_len * line_counter)),
+                // _ => EqKey::from_raw_line(key_pointer_p.add(EqKey::key_len * line_counter)),
             };
             // let key_ptr: *const [u8; LE_KEY_LEN] =
             //     slice::from_raw_parts(key_pointer_p.add(LE_KEY_LEN * line_counter), LE_KEY_LEN).as_ptr()
@@ -94,7 +97,7 @@ pub fn eval_key_stream(
 
             // Run the evaluation
             // TODO: Z/2Z
-            let result: u8 = key.eval(&mut prg, party_id, x);
+            let result: u32 = key.eval(&mut prg, party_id, x);
 
             // TODO: wrap around if too large
 

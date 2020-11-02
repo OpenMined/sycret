@@ -1,4 +1,6 @@
-use rand::Rng;
+use rand::distributions::Uniform;
+use rand::{thread_rng, Rng};
+
 use rayon::prelude::*;
 
 pub mod eq;
@@ -37,13 +39,17 @@ pub unsafe extern "C" fn keygen(
 
     // Generate AES-128 keys for MMO (expansion factor 2 or 4)
     let mut rng = rand::thread_rng();
-    let aes_keys: Vec<u128> = rng.sample_iter().take(n_aes_keys).collect();
+    let mut aes_keys = Vec::new();
+    // let aes_keys: [u128; n_aes_keys] = rng.gen();
+    // let aes_keys: Vec<u128> = rng.sample_iter(Uniform).take(n_aes_keys).collect();
 
     // Write the AES key to the first line of the key block.
     // The rest of the line is empty (we keep a Numpy array shape).
     for i in 0..n_aes_keys {
-        utils::write_aes_key_to_raw_line(aes_keys[i], keys_a_pointer.add(L * i) as *mut u8);
-        utils::write_aes_key_to_raw_line(aes_keys[i], keys_b_pointer.add(L * i) as *mut u8);
+        let aes_key = rng.gen();
+        aes_keys.push(aes_key);
+        utils::write_aes_key_to_raw_line(aes_key, keys_a_pointer.add(L * i) as *mut u8);
+        utils::write_aes_key_to_raw_line(aes_key, keys_b_pointer.add(L * i) as *mut u8);
     }
 
     let mut key_stream_args = vec![];

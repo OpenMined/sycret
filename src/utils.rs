@@ -51,6 +51,19 @@ impl PRG for MMO {
         }
     }
 
+    fn from_vec(aes_keys: &Vec<u128>) -> MMO {
+        let mut ciphers = vec![];
+        for key in aes_keys {
+            ciphers.push(aesni::Aes128::new(GenericArray::from_slice(
+                &key.to_le_bytes(),
+            )));
+        }
+        MMO {
+            // expansion_factor: ciphers.len(),
+            ciphers: ciphers,
+        }
+    }
+
     fn expand(&mut self, seed: u128) -> Vec<u128> {
         // NOTE: to improve performance, try:
         // - const generic instead of Vec?
@@ -59,7 +72,7 @@ impl PRG for MMO {
         let mut output_array = [0u8; L];
         let seed_slice = seed.to_le_bytes();
         // Matyas-Meyer-Oseas with AES (ECB)
-        for cipher in self.ciphers {
+        for cipher in &self.ciphers {
             let mut block = GenericArray::clone_from_slice(&seed_slice);
             cipher.encrypt_block(&mut block);
             // XOR byte by byte
