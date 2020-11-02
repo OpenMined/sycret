@@ -1,0 +1,23 @@
+[package]
+name = "sycret"
+version = "0.0.1-alpha.1"
+authors = ["Pierre Tholoniat"]
+edition = "2018"
+license = "Apache-2.0"
+repository = ""
+homepage = ""
+readme = "README.md"
+
+[dependencies]
+maturin = "0.8.2"
+
+[lib]
+name = "sycret"
+crate-type = ["cdylib"]
+
+[package.metadata.maturin]
+maintainer = "Pierre Tholoniat"
+maintainer-email = "pierre@tholoniat.com"
+requires-dist = ["numpy>=1", "cffi>=1", "pycparser>=2"]
+requires-python=">=3.6"
+

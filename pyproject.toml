@@ -1,0 +1,7 @@
+[build-system]
+requires = ["maturin"]
+build-backend = "maturin"
+
+[tool.maturin]
+bindings = "cffi"
+manylinux = "2010"
