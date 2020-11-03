@@ -13,13 +13,14 @@ pub const N: usize = 4;
 pub const L: usize = 16;
 
 fn build_params(op_id: usize) -> (usize, usize, usize) {
-    let (keylen, n_aes_streams) = match op_id {
-        1 => (1205, 4),
+    let (keylen, n_aes_keys) = match op_id {
+        // 1 => (1205, 4),
+        1 => (1304, 4),
         _ => (597, 2),
     };
 
     // TODO: small inputs
-    let n_aes_keys = 128;
+    let n_aes_streams = 128;
 
     (n_aes_keys, keylen, n_aes_streams)
 }

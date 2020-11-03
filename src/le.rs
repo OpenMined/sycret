@@ -53,7 +53,8 @@ const CW_LEN: usize = 36;
 
 impl FSSKey for LeKey {
     // 4 + 16 + 36 * (4 * 8) + 1 * (4 * 8 + 1)
-    const key_len: usize = 1205;
+    // const key_len: usize = 1205;
+    const key_len: usize = 1304;
 
     unsafe fn to_raw_line(&self, key_pointer: *mut u8) {
         // Cast the output line to a raw pointer.

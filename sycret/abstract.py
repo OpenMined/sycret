@@ -1,11 +1,21 @@
 import numpy as np
-from abc import ABC, abstractmethod 
+from abc import ABC, abstractmethod
+
 
 class AbstractFSSFactory(ABC):
-    def __init__(keylen, n_threads=0, x_type=np.int64, key_type=np.uint8, result_type=np.int64,  N = 4, L = 16):
+    def __init__(
+        self,
+        key_len,
+        n_threads=0,
+        x_type=np.int64,
+        key_type=np.uint8,
+        result_type=np.int64,
+        N=4,
+        L=16,
+    ):
         self.N = N
         self.L = L
-        self.keylen = keylen
+        self.key_len = key_len
         self.x_type = x_type
         self.key_type = key_type
         self.result_type = result_type
@@ -16,6 +26,6 @@ class AbstractFSSFactory(ABC):
     def keygen(self, n_values):
         pass
 
-    @abstractmethod    
+    @abstractmethod
     def eval(self, party_id, xs, keys):
         pass
