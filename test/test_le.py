@@ -43,6 +43,9 @@ def test_multiline(n_values, n_loops=16):
             le.eval(1, x, keys_b),
         )
 
+        print(r_a)
+        print(r_b)
+
         result = r_a + r_b
 
         print(result)
@@ -58,5 +61,5 @@ def test_multiline(n_values, n_loops=16):
 
 
 if __name__ == "__main__":
-    test_multiline(10)
+    test_multiline(1000)
 
