@@ -124,7 +124,7 @@ pub unsafe extern "C" fn eval(
     }
 
     let mut key_stream_args = vec![];
-    let mut line_counter = 1; // The first line is taken by the AES key.
+    let mut line_counter = 0;
     let default_length = n_values / n_aes_streams;
     let n_longer_streams = n_values % n_aes_streams;
     let mut stream_length: usize;
@@ -146,6 +146,7 @@ pub unsafe extern "C" fn eval(
                 keys_pointer.add(keylen * (line_counter + 1)) as usize,
                 results_pointer.add(line_counter) as usize,
             ));
+            // The first line is taken by the AES key.
             line_counter += stream_length;
         }
     }

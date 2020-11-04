@@ -37,6 +37,9 @@ def test_multiline(n_values, n_loops=16):
         x[1] = x[1] + 5
         x[2] = x[2] - 1
         x[4] = x[4] + 1
+        x[8] = x[8] - 635435
+
+        x[9] = x[9] + 1
 
         r_a, r_b = (
             le.eval(0, x, keys_a),
@@ -51,6 +54,8 @@ def test_multiline(n_values, n_loops=16):
         expected_result[1] = 0
         expected_result[2] = 1
         expected_result[4] = 0
+        expected_result[8] = 1
+        expected_result[9] = 0
 
         # print(expected_result.dtype)
         # print(result.dtype)

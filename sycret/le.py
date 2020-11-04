@@ -46,4 +46,12 @@ class LeFactory(AbstractFSSFactory):
 
         # Call Rust on this memory.
         lib.eval(r_party_id, r_xs, r_keys, r_results, r_n_values, r_n_threads, r_op_id)
+
+        # Balance to have sum zero
+        mid_point = 2 ** (4 * 8 - 1)
+        max_point = mid_point * 2
+        for i in range(len(results)):
+            if results[i] > mid_point:
+                results[i] -= max_point
+
         return results
