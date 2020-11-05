@@ -4,7 +4,9 @@ from .utils import _as_u8_array, _as_usize, _as_i64_array
 
 # TODO: type annotation and comments
 
-
+# TODO: add some utilities to interact with the keys,
+# (e.g. get alpha share for the tests)
+# No need for a class for the key (overhead)
 class FSSFactory:
     def __init__(
         self,

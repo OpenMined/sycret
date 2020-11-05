@@ -6,7 +6,7 @@ import sys
 import sycret
 
 
-@pytest.mark.parametrize("n_values", [5, 10, 140, 1024, 32465])
+@pytest.mark.parametrize("n_values", [10, 15, 140, 1024, 32465])
 def test_multiline(n_values, n_loops=16):
 
     le = sycret.LeFactory(n_threads=6)

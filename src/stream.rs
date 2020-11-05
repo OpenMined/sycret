@@ -1,5 +1,6 @@
 use std::slice;
 
+use super::eq::EqKey;
 use super::le::LeKey;
 use super::utils::MMO;
 use super::{L, N};
@@ -46,16 +47,20 @@ pub fn generate_key_stream(
     let mut prg = MMO::from_vec(aes_keys);
 
     for line_counter in 0..stream_length {
-        let (key_a, key_b) = match op_id {
-            _ => LeKey::generate_keypair(&mut prg), // _ => EqKey::generate_keypair(&mut prg),
-        };
-        let key_len = match op_id {
-            _ => LeKey::key_len,
-        };
-
-        unsafe {
-            &key_a.to_raw_line(key_a_p.add(key_len * line_counter));
-            &key_b.to_raw_line(key_b_p.add(key_len * line_counter));
+        if op_id == 0 {
+            let (key_a, key_b) = EqKey::generate_keypair(&mut prg);
+            let key_len = EqKey::key_len;
+            unsafe {
+                &key_a.to_raw_line(key_a_p.add(key_len * line_counter));
+                &key_b.to_raw_line(key_b_p.add(key_len * line_counter));
+            }
+        } else {
+            let (key_a, key_b) = LeKey::generate_keypair(&mut prg);
+            let key_len = LeKey::key_len;
+            unsafe {
+                &key_a.to_raw_line(key_a_p.add(key_len * line_counter));
+                &key_b.to_raw_line(key_b_p.add(key_len * line_counter));
+            }
         }
     }
 }
@@ -86,10 +91,17 @@ pub fn eval_key_stream(
             let x_ptr: *const [u8; N] = slice::from_raw_parts(x_pointer_p.add(N * line_counter), N)
                 .as_ptr() as *const [u8; N];
             let x: u32 = u32::from_le_bytes(*x_ptr);
-            let key = match op_id {
-                _ => LeKey::from_raw_line(key_pointer_p.add(LeKey::key_len * line_counter)),
-                // _ => EqKey::from_raw_line(key_pointer_p.add(EqKey::key_len * line_counter)),
-            };
+
+            if op_id == 0 {
+                let key = EqKey::from_raw_line(key_pointer_p.add(EqKey::key_len * line_counter));
+                let result: i8 = key.eval(&mut prg, party_id, x);
+                *(result_ptr_p.add(line_counter)) = result as i64;
+            } else {
+                let key = LeKey::from_raw_line(key_pointer_p.add(LeKey::key_len * line_counter));
+                let result: i8 = key.eval(&mut prg, party_id, x);
+                *(result_ptr_p.add(line_counter)) = result as i64;
+            }
+
             // let key_ptr: *const [u8; LE_KEY_LEN] =
             //     slice::from_raw_parts(key_pointer_p.add(LE_KEY_LEN * line_counter), LE_KEY_LEN).as_ptr()
             //         as *const [u8; LE_KEY_LEN];
@@ -97,12 +109,9 @@ pub fn eval_key_stream(
 
             // Run the evaluation
             // TODO: Z/2Z
-            let result: i8 = key.eval(&mut prg, party_id, x);
-
             // TODO: wrap around if too large
 
             // Write the result in a raw line for Numpy
-            *(result_ptr_p.add(line_counter)) = result as i64;
         }
     }
 }
