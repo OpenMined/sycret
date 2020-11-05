@@ -4,13 +4,8 @@ from .abstract import AbstractFSSFactory
 from .sycret import lib
 from .utils import _as_u8_array, _as_usize, _as_i64_array
 
-# TODO: type annotation and comments
 
 
-class LeFactory(AbstractFSSFactory):
-    def __init__(self, n_threads=0):
-        # super().__init__(key_len=1304, n_threads=n_threads)
-        super().__init__(key_len=1205, n_threads=n_threads)
 
     def keygen(self, n_values=1):
         # Allocate memory.

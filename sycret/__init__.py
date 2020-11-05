@@ -1,2 +1,1 @@
-from sycret.eq import EqFactory
-from sycret.le import LeFactory
+from sycret.fss import EqFactory, LeFactory
