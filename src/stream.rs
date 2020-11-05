@@ -11,7 +11,7 @@ pub trait FSSKey: Sized {
 
     unsafe fn to_raw_line(&self, raw_line_pointer: *mut u8);
 
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
+    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> i8;
 
     fn generate_keypair(prg: &mut impl PRG) -> (Self, Self);
 }
@@ -97,7 +97,7 @@ pub fn eval_key_stream(
 
             // Run the evaluation
             // TODO: Z/2Z
-            let result: u32 = key.eval(&mut prg, party_id, x);
+            let result: i8 = key.eval(&mut prg, party_id, x);
 
             // TODO: wrap around if too large
 

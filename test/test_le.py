@@ -14,12 +14,12 @@ def test_multiline(n_values, n_loops=16):
     for _ in range(n_loops):
         keys_a, keys_b = le.keygen(n_values)
 
-        print("keys")
-        print(keys_a.shape)
-        print(keys_a)
-        print(list(keys_a[0]))
-        print(list(keys_a[1]))
-        print(list(keys_a[-1]))
+        # print("keys")
+        # print(keys_a.shape)
+        # print(keys_a)
+        # print(list(keys_a[0]))
+        # print(list(keys_a[1]))
+        # print(list(keys_a[-1]))
 
         # Reshape to a C-contiguous array (necessary for from_buffer)
 
@@ -45,6 +45,8 @@ def test_multiline(n_values, n_loops=16):
             le.eval(0, x, keys_a),
             le.eval(1, x, keys_b),
         )
+        print(r_a)
+        print(r_b)
 
         result = r_a + r_b
 
