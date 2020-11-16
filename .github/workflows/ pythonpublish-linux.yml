@@ -27,9 +27,6 @@ jobs:
       - name: cargo test
         run: | # --release
           cargo test
-      - name: AESNI flag
-        run: |
-          echo "RUSTFLAGS='-C target-feature=+aes,+ssse3'" >> $GITHUB_ENV
       - name: maturin build
         run: |
           pip install --upgrade pip
