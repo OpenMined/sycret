@@ -94,11 +94,11 @@ pub fn eval_key_stream(
 
             if op_id == 0 {
                 let key = EqKey::from_raw_line(key_pointer_p.add(EqKey::key_len * line_counter));
-                let result: i8 = key.eval(&mut prg, party_id, x);
+                let result: u32 = key.eval(&mut prg, party_id, x);
                 *(result_ptr_p.add(line_counter)) = result as i64;
             } else {
                 let key = LeKey::from_raw_line(key_pointer_p.add(LeKey::key_len * line_counter));
-                let result: i8 = key.eval(&mut prg, party_id, x);
+                let result: u32 = key.eval(&mut prg, party_id, x);
                 *(result_ptr_p.add(line_counter)) = result as i64;
             }
 

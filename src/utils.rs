@@ -6,6 +6,25 @@ use std::slice;
 use super::stream::PRG;
 use super::{L, N};
 
+pub fn share_leaf(mask_a: u32, mask_b: u32, share_bit: u8, flip_bit: u8) -> u32 {
+    let mut leaf = mask_b.wrapping_sub(mask_a).wrapping_add(share_bit as u32);
+    if flip_bit == 1 {
+        leaf = 0u32.wrapping_sub(leaf);
+    }
+    leaf
+}
+
+pub fn compute_out(mask: u32, leaf: u32, tau: u8, flip_bit: u8) -> u32 {
+    let mut out: u32 = match tau {
+        1 => leaf.wrapping_add(mask),
+        _ => mask,
+    };
+    if flip_bit == 1 {
+        out = 0u32.wrapping_sub(out);
+    }
+    out
+}
+
 pub fn bit_decomposition_u32(alpha: u32) -> Vec<u8> {
     let mut alpha_bits: Vec<u8> = Vec::new();
     // Most significant bits first

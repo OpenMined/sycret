@@ -13,22 +13,17 @@ fn generate_and_evaluate_alpha() {
         let aes_keys: [u128; 4] = rng.gen();
         let mut prg = MMO::from_slice(&aes_keys);
         let (k_a, k_b) = EqKey::generate_keypair(&mut prg);
-        let t_leaf = k_a.t_leaf;
 
         // Recover alpha from the shares.
-        let mut alpha = k_a.alpha_share.wrapping_add(k_b.alpha_share);
+        let alpha = k_a.alpha_share.wrapping_add(k_b.alpha_share);
         println!("alpha: {}", alpha);
 
         // Evaluate separately on the same input.
         let t_a_output = k_a.eval(&mut prg, 0, alpha);
         let t_b_output = k_b.eval(&mut prg, 1, alpha);
-        println!(
-            "t_a, t_b, t_leaf: {}, {}, {}",
-            t_a_output, t_b_output, t_leaf
-        );
 
-        // The output bit is additively secret-shared for public beta.
-        assert_eq!(t_a_output + t_b_output, 1i8);
+        // The output bit is additively secret-shared in Z/32Z
+        assert_eq!(t_a_output.wrapping_add(t_b_output), 1u32);
     }
 }
 
@@ -40,7 +35,6 @@ fn generate_and_evaluate_not_alpha() {
         let aes_keys: [u128; 4] = rng.gen();
         let mut prg = MMO::from_slice(&aes_keys);
         let (k_a, k_b) = EqKey::generate_keypair(&mut prg);
-        let t_leaf = k_a.t_leaf;
 
         // Recover alpha from the shares.
         let mut alpha = k_a.alpha_share.wrapping_add(k_b.alpha_share);
@@ -54,12 +48,8 @@ fn generate_and_evaluate_not_alpha() {
         // Evaluate separately on the same input.
         let t_a_output = k_a.eval(&mut prg, 0, alpha);
         let t_b_output = k_b.eval(&mut prg, 1, alpha);
-        println!(
-            "t_a, t_b, t_leaf: {}, {}, {}",
-            t_a_output, t_b_output, t_leaf
-        );
 
-        // The output bit is additively secret-shared for public beta.
-        assert_eq!(t_a_output + t_b_output, 0i8);
+        // The output bit is additively secret-shared in Z/32Z
+        assert_eq!(t_a_output.wrapping_add(t_b_output), 0u32);
     }
 }

@@ -5,7 +5,7 @@ use std::num::Wrapping;
 use std::slice;
 
 use super::stream::{FSSKey, PRG};
-use super::utils::{bit_decomposition_u32, MMO};
+use super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
 use super::{L, N};
 
 pub struct LeKey {
@@ -324,25 +324,6 @@ fn decompress_word(w: &CompressedCorrectionWord) -> CorrectionWord {
         t_r: w.t_r,
         u_r: w.u_r,
     }
-}
-
-fn share_leaf(mask_a: u32, mask_b: u32, share_bit: u8, flip_bit: u8) -> u32 {
-    let leaf = mask_b.wrapping_sub(mask_a).wrapping_add(share_bit as u32);
-    if flip_bit == 1 {
-        leaf = 0u32.wrapping_sub(leaf);
-    }
-    leaf
-}
-
-fn compute_out(mask: u32, leaf: u32, tau: u8, flip_bit: u8) -> u32 {
-    let out: u32 = match tau {
-        1 => leaf.wrapping_add(mask),
-        _ => mask,
-    };
-    if flip_bit == 1 {
-        out = 0u32.wrapping_sub(out);
-    }
-    out
 }
 
 ///

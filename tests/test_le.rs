@@ -7,7 +7,7 @@ pub use sycret::le::*;
 pub use sycret::stream::{FSSKey, PRG};
 pub use sycret::utils::MMO;
 
-fn eval_on_alpha_with_offset(offset: i32) -> (i8, i8) {
+fn eval_on_alpha_with_offset(offset: i32) -> (u32, u32) {
     println!("\n\nOffset {}", offset);
     let mut rng = rand::thread_rng();
     let aes_keys: [u128; 4] = rng.gen();
@@ -46,7 +46,7 @@ fn generate_and_evaluate_alpha() {
     // alpha is randomized, test on different inputs to make sure we are not just lucky.
     for _ in 0..16 {
         let (a_output, b_output) = eval_on_alpha_with_offset(0);
-        assert_eq!(a_output + b_output, 1);
+        assert_eq!(a_output.wrapping_add(b_output), 1u32);
     }
 }
 
@@ -54,7 +54,7 @@ fn generate_and_evaluate_alpha() {
 fn generate_and_evaluate_le_alpha() {
     for _ in 0..16 {
         let (a_output, b_output) = eval_on_alpha_with_offset(-1);
-        assert_eq!(a_output + b_output, 1);
+        assert_eq!(a_output.wrapping_add(b_output), 1u32);
     }
 }
 
@@ -62,6 +62,6 @@ fn generate_and_evaluate_le_alpha() {
 fn generate_and_evaluate_strictly_greater_than_alpha() {
     for _ in 0..16 {
         let (a_output, b_output) = eval_on_alpha_with_offset(1);
-        assert_eq!(a_output + b_output, 0);
+        assert_eq!(a_output.wrapping_add(b_output), 0u32);
     }
 }

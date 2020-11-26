@@ -9,7 +9,7 @@ use std::num::Wrapping;
 use std::slice;
 
 use super::stream::{FSSKey, PRG};
-use super::utils::{bit_decomposition_u32, MMO};
+use super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
 use super::{L, N};
 
 #[derive(Debug)]
@@ -19,7 +19,7 @@ pub struct EqKey {
     pub cw: [u128; N * 8],
     pub t_l: [u8; N * 8],
     pub t_r: [u8; N * 8],
-    pub t_leaf: u8,
+    pub cw_leaf: u32,
 }
 
 impl FSSKey for EqKey {
@@ -58,7 +58,7 @@ impl FSSKey for EqKey {
         let mut t_l = [0u8; N * 8];
         let mut t_r = [0u8; N * 8];
 
-        let t_leaf = generate_cw_from_seeds(prg, alpha, s_a, s_b, &mut cw, &mut t_l, &mut t_r);
+        let cw_leaf = generate_cw_from_seeds(prg, alpha, s_a, s_b, &mut cw, &mut t_l, &mut t_r);
 
         // Secret-share alpha and split the keys between Alice and Bob.
         let mask: u32 = rng.gen();
@@ -71,7 +71,7 @@ impl FSSKey for EqKey {
                 cw,
                 t_l,
                 t_r,
-                t_leaf,
+                cw_leaf,
             },
             EqKey {
                 alpha_share: mask,
@@ -79,12 +79,12 @@ impl FSSKey for EqKey {
                 cw,
                 t_l,
                 t_r,
-                t_leaf,
+                cw_leaf,
             },
         )
     }
 
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> i8 {
+    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32 {
         // Initialize the control bit and the seed.
         assert!((party_id == 0u8) || (party_id == 1u8));
         let mut t_i: u8 = party_id;
@@ -119,21 +119,7 @@ impl FSSKey for EqKey {
                 }
             }
         }
-
-        // Output an additive secret share instead of a XOR. Public beta = 1.
-        let cw_leaf = match self.t_leaf {
-            0 => 1i8,
-            _ => -1i8,
-        };
-
-        // t_leaf = t_b if we are on the special path. Otherwise, t_a = t_b anyway.
-        let output_t = match party_id {
-            0 => t_i as i8 * cw_leaf,
-            _ => -1 * t_i as i8 * cw_leaf,
-        };
-
-        // The Python wrapper will map this to an i32 or i64 if necessary.
-        output_t
+        compute_out(s_i as u32, self.cw_leaf, t_i, party_id)
     }
 }
 
@@ -149,7 +135,7 @@ fn generate_cw_from_seeds(
     cw: &mut [u128; N * 8],
     t_l: &mut [u8; N * 8],
     t_r: &mut [u8; N * 8],
-) -> u8 {
+) -> u32 {
     // Initialize control bits.
     let mut t_a_i = 0u8;
     let mut t_b_i = 1u8;
@@ -207,7 +193,8 @@ fn generate_cw_from_seeds(
             t_b_i = t_b_keep ^ t_cw_keep;
         }
     }
-    t_b_i
+    // We only need 32 bits to make a sharing of 1
+    share_leaf(s_a_i as u32, s_b_i as u32, 1, t_b_i)
 }
 
 ///
@@ -258,7 +245,9 @@ fn write_key_to_array(key: &EqKey, array: &mut [u8; EqKey::key_len]) {
         array[cw_end - 2] = key.t_l[i];
         array[cw_end - 1] = key.t_r[i];
     }
-    array[EqKey::key_len - 1] = key.t_leaf;
+    // array[EqKey::key_len - 1] = key.t_leaf;
+    let j = EqKey::key_len - N;
+    array[j..j + N].copy_from_slice(&key.cw_leaf.to_le_bytes());
 }
 
 fn read_key_from_array(array: &[u8; EqKey::key_len]) -> EqKey {
@@ -277,7 +266,9 @@ fn read_key_from_array(array: &[u8; EqKey::key_len]) -> EqKey {
         t_r[i] = array[cw_end - 1];
     }
 
-    let t_leaf = array[EqKey::key_len - 1];
+    // let t_leaf = array[EqKey::key_len - 1];
+    let j = EqKey::key_len - N;
+    let cw_leaf = u32::from_le_bytes(array[j..j + N].try_into().unwrap());
 
     EqKey {
         alpha_share,
@@ -285,6 +276,6 @@ fn read_key_from_array(array: &[u8; EqKey::key_len]) -> EqKey {
         cw,
         t_l,
         t_r,
-        t_leaf,
+        cw_leaf,
     }
 }
