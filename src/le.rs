@@ -12,7 +12,7 @@ pub struct LeKey {
     pub alpha_share: u32,
     pub s: u128,
     pub cw: [CompressedCorrectionWord; N * 8],
-    pub cw_leaf: [i8; N * 8 + 1],
+    pub cw_leaf: [u32; N * 8 + 1],
 }
 
 impl fmt::Debug for LeKey {
@@ -29,11 +29,11 @@ impl fmt::Debug for LeKey {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct CorrectionWord {
-    pub z_l: u128,
+    pub z_l: u32,
     pub u_l: u8,
     pub s_l: u128,
     pub t_l: u8,
-    pub z_r: u128,
+    pub z_r: u32,
     pub u_r: u8,
     pub s_r: u128,
     pub t_r: u8,
@@ -45,16 +45,15 @@ pub struct CompressedCorrectionWord {
     pub t_l: u8,
     pub u_r: u8,
     pub t_r: u8,
-    pub z: u128,
+    pub z: u32,
     pub s: u128,
 }
 
-const CW_LEN: usize = 36;
+const CW_LEN: usize = 24;
 
 impl FSSKey for LeKey {
-    // 4 + 16 + 36 * (4 * 8) + 1 * (4 * 8 + 1)
-    const key_len: usize = 1205;
-    // const key_len: usize = 1304;
+    // 4 + 16 + 36 * (4 * 8) + 4 * (4 * 8 + 1)
+    const key_len: usize = 1304;
 
     unsafe fn to_raw_line(&self, key_pointer: *mut u8) {
         // Cast the output line to a raw pointer.
@@ -102,18 +101,16 @@ impl FSSKey for LeKey {
         )
     }
 
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> i8 {
+    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32 {
         assert!((party_id == 0u8) || (party_id == 1u8));
         let mut t_i: u8 = party_id;
         let mut s_i: u128 = self.s;
         let mut u_i = 0u8;
-        let mut z_i = 0u128;
-        let mut out = 0i8;
-        let mut out_v = vec![];
+        let mut z_i = 0u32;
+        let mut out = 0u32;
         let x_bits: Vec<u8> = bit_decomposition_u32(x);
         for i in 0..(N * 8) {
             let mut w = h(prg, s_i);
-            // let mut w = h_127(s_i);
             if t_i == 1 {
                 w = xor_2_words(&w, &decompress_word(&self.cw[i]))
             }
@@ -128,24 +125,14 @@ impl FSSKey for LeKey {
                 s_i = w.s_r;
                 t_i = w.t_r;
             }
-            // u_i and cw_leaf are bits, we only need one bit from z_i to hide the result
-            // We now that we won't have any overflow since we are summing just up to N < 2^8 bits
-            // TODO: do we still need cw_leaf as i8 if we have to use wrapping anyway?
-            let mut out_i = ((u_i as i8) * self.cw_leaf[i]).wrapping_add((z_i & 1) as i8);
-            if party_id == 1 {
-                // out_i = -1 * out_i;
-                out_i = 0i8.wrapping_sub(out_i);
-            }
-            out_v.push(Wrapping(out_i));
-        }
-        let mut out_n = ((t_i as i8) * self.cw_leaf[N * 8]).wrapping_add((s_i & 1) as i8);
-        if party_id == 1 {
-            out_n = 0i8.wrapping_sub(out_n);
-        }
-        out_v.push(Wrapping(out_n));
 
-        let result = out_v.iter().sum::<Wrapping<i8>>().0;
-        result
+            // Mask and sum in Z/2^32Z
+            let out_i = compute_out(z_i, self.cw_leaf[i], u_i, party_id);
+            out = out.wrapping_add(out_i);
+        }
+        let out_n = compute_out(s_i as u32, self.cw_leaf[N * 8], t_i, party_id);
+        // The final sum is a share of (x <= alpha) in Z/2^32Z
+        out.wrapping_add(out_n)
     }
 }
 
@@ -157,11 +144,13 @@ pub fn h(prg: &mut impl PRG, seed: u128) -> CorrectionWord {
 
     let out = prg.expand(seed);
 
+    // TODO: update prg for u32 sigma
+
     // Get the randomness and chop the control bits.
     let mut s_l = out[0] >> 1 << 1;
-    let mut z_l = out[1] >> 1 << 1;
+    let mut z_l = (out[1] >> 1 << 1) as u32;
     let mut s_r = out[2] >> 1 << 1;
-    let mut z_r = out[3] >> 1 << 1;
+    let mut z_r = (out[3] >> 1 << 1) as u32;
 
     let t_l = (out[0] & 1u128) as u8;
     let u_l = (out[1] & 1u128) as u8;
@@ -186,7 +175,7 @@ fn generate_cw_from_seeds(
     alpha: u32,
     s_a: u128,
     s_b: u128,
-) -> ([CompressedCorrectionWord; N * 8], [i8; N * 8 + 1]) {
+) -> ([CompressedCorrectionWord; N * 8], [u32; N * 8 + 1]) {
     // Initialize the output control words. Arrays instead of vectors for CFFI.
     let mut cw = [CompressedCorrectionWord {
         s: 0,
@@ -196,7 +185,7 @@ fn generate_cw_from_seeds(
         u_l: 0,
         u_r: 0,
     }; N * 8];
-    let mut cw_leaf = [0i8; N * 8 + 1];
+    let mut cw_leaf = [0u32; N * 8 + 1];
 
     // Initialize control bits.
     let mut t_a_i = 0u8;
@@ -277,13 +266,9 @@ fn generate_cw_from_seeds(
             u_b_i = w_b_next.u_l;
         }
 
-        cw_leaf[i] = share_leaf_i8(z_a_i, z_b_i, alpha_bits[i], u_b_i);
+        cw_leaf[i] = share_leaf(z_a_i, z_b_i, alpha_bits[i], u_b_i);
     }
-    // NOTE: The flip bit (tau or t) is not used modulo 2.
-
-    // Public beta = 1
-    // cw_leaf[N * 8] = t_b_i;
-    cw_leaf[N * 8] = share_leaf_i8(s_a_i, s_b_i, 1, t_b_i);
+    cw_leaf[N * 8] = share_leaf(s_a_i as u32, s_b_i as u32, 1, t_b_i);
     (cw, cw_leaf)
 }
 
@@ -341,26 +326,23 @@ fn decompress_word(w: &CompressedCorrectionWord) -> CorrectionWord {
     }
 }
 
-fn share_leaf(seed_a: u128, seed_b: u128, share_bit: u8, flip_bit: u8) -> u32 {
-    let mut leaf = (seed_b as u32)
-        .wrapping_sub(seed_a as u32)
-        .wrapping_add(share_bit as u32);
+fn share_leaf(mask_a: u32, mask_b: u32, share_bit: u8, flip_bit: u8) -> u32 {
+    let leaf = mask_b.wrapping_sub(mask_a).wrapping_add(share_bit as u32);
     if flip_bit == 1 {
         leaf = 0u32.wrapping_sub(leaf);
     }
     leaf
 }
 
-// TODO: suspicious wrapping for i8
-// We are masking only one bit
-fn share_leaf_i8(seed_a: u128, seed_b: u128, share_bit: u8, flip_bit: u8) -> i8 {
-    let mut leaf = ((seed_b & 1) as i8)
-        .wrapping_sub((seed_a & 1) as i8)
-        .wrapping_add(share_bit as i8);
+fn compute_out(mask: u32, leaf: u32, tau: u8, flip_bit: u8) -> u32 {
+    let out: u32 = match tau {
+        1 => leaf.wrapping_add(mask),
+        _ => mask,
+    };
     if flip_bit == 1 {
-        leaf = 0i8.wrapping_sub(leaf);
+        out = 0u32.wrapping_sub(out);
     }
-    leaf
+    out
 }
 
 ///
@@ -377,22 +359,21 @@ fn write_key_to_array(key: &LeKey, array: &mut [u8; LeKey::key_len]) {
 
         // Copy seeds first (u128)
         array[j..j + L].copy_from_slice(&cw.s.to_le_bytes());
-        array[j + L..j + 2 * L].copy_from_slice(&cw.z.to_le_bytes());
+        array[j + L..j + L + N].copy_from_slice(&cw.z.to_le_bytes());
 
         // Copy control bits at the end (u8)
-        j = j + 2 * L;
+        j = j + L + N;
         array[j] = cw.t_l;
         array[j + 1] = cw.t_r;
         array[j + 2] = cw.u_l;
         array[j + 3] = cw.u_r;
     }
     for i in 0..(N * 8 + 1) {
-        let j = N + L + N * 8 * CW_LEN + i;
-        array[j] = key.cw_leaf[i].to_le_bytes()[0];
-        // array[j..j + 1].copy_from_slice(&key.cw_leaf[i].to_le_bytes());
+        // let j = N + L + N * 8 * CW_LEN + i;
+        // array[j] = key.cw_leaf[i].to_le_bytes()[0];
         // array[N + L + N * 8 * CW_LEN + i] = key.cw_leaf[i];
-        // let j = N + L + N * 8 * CW_LEN + i * N;
-        // array[j..j + N].copy_from_slice(&key.cw_leaf[i].to_le_bytes());
+        let j = N + L + N * 8 * CW_LEN + i * N;
+        array[j..j + N].copy_from_slice(&key.cw_leaf[i].to_le_bytes());
     }
 }
 
@@ -408,15 +389,15 @@ fn read_key_from_array(array: &[u8; LeKey::key_len]) -> LeKey {
         u_l: 0,
         u_r: 0,
     }; N * 8];
-    let mut cw_leaf = [0i8; N * 8 + 1];
+    let mut cw_leaf = [0u32; N * 8 + 1];
 
     for i in 0..(N * 8) {
         let mut j = N + L + i * CW_LEN;
 
         let s = u128::from_le_bytes(array[j..j + L].try_into().unwrap());
-        let z = u128::from_le_bytes(array[j + L..j + 2 * L].try_into().unwrap());
+        let z = u32::from_le_bytes(array[j + L..j + L + N].try_into().unwrap());
 
-        j = j + 2 * L;
+        j = j + L + N;
         let t_l = array[j];
         let t_r = array[j + 1];
         let u_l = array[j + 2];
@@ -432,9 +413,9 @@ fn read_key_from_array(array: &[u8; LeKey::key_len]) -> LeKey {
         }
     }
     for i in 0..(N * 8 + 1) {
-        // let j = N + L + N * 8 * CW_LEN + i * N;
-        // cw_leaf[i] = u32::from_le_bytes(array[j..j + N].try_into().unwrap());
-        cw_leaf[i] = i8::from_le_bytes([array[N + L + N * 8 * CW_LEN + i]]);
+        let j = N + L + N * 8 * CW_LEN + i * N;
+        cw_leaf[i] = u32::from_le_bytes(array[j..j + N].try_into().unwrap());
+        // cw_leaf[i] = i8::from_le_bytes([array[N + L + N * 8 * CW_LEN + i]]);
         // cw_leaf[i] = 0i8;
     }
 
