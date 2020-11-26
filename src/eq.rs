@@ -23,7 +23,7 @@ pub struct EqKey {
 }
 
 impl FSSKey for EqKey {
-    const key_len: usize = 597;
+    const key_len: usize = 621;
 
     unsafe fn to_raw_line(&self, key_pointer: *mut u8) {
         // Cast the output line to a raw pointer.

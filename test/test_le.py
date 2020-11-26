@@ -14,26 +14,15 @@ def test_multiline(n_values, n_loops=16):
     for _ in range(n_loops):
         keys_a, keys_b = le.keygen(n_values)
 
-        # print("keys")
-        # print(keys_a.shape)
-        # print(keys_a)
-        # print(list(keys_a[0]))
-        # print(list(keys_a[1]))
-        # print(list(keys_a[-1]))
-
         # Reshape to a C-contiguous array (necessary for from_buffer)
 
         alpha_a = np.frombuffer(np.ascontiguousarray(keys_a[1:, 0:4]), dtype=np.uint32)
         alpha_b = np.frombuffer(np.ascontiguousarray(keys_b[1:, 0:4]), dtype=np.uint32)
         alpha = alpha_a + alpha_b
 
-        # print(
-        #     f"shares from buffer: {alpha_a}, {alpha_b}, alpha: {alpha}, back to buf: {alpha.view(dtype=np.uint8)}"
-        # )
-
         x = alpha.astype(np.int64)
-        # We just modify some input values, the rest is on the special path.
 
+        # We just modify some input values, the rest is on the special path.
         x[1] = x[1] + 5
         x[2] = x[2] - 1
         x[4] = x[4] + 1
@@ -45,12 +34,9 @@ def test_multiline(n_values, n_loops=16):
             le.eval(0, x, keys_a),
             le.eval(1, x, keys_b),
         )
-        print(r_a)
-        print(r_b)
 
-        result = r_a + r_b
-
-        print(result)
+        # In PySyft, the AdditiveSharingTensor class will take care of the modulo
+        result = (r_a + r_b) % (2 ** (le.N * 8))
 
         expected_result = np.ones(n_values, dtype=np.int64)
         expected_result[1] = 0
@@ -59,8 +45,6 @@ def test_multiline(n_values, n_loops=16):
         expected_result[8] = 1
         expected_result[9] = 0
 
-        # print(expected_result.dtype)
-        # print(result.dtype)
         assert (result == expected_result).all()
 
 
