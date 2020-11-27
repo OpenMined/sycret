@@ -15,7 +15,7 @@ pub const L: usize = 16;
 fn build_params(op_id: usize) -> (usize, usize, usize) {
     let (keylen, n_aes_keys) = match op_id {
         // 1 => (1205, 4),
-        1 => (1304, 4),
+        1 => (920, 3),
         _ => (621, 2),
     };
 

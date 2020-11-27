@@ -52,8 +52,8 @@ pub struct CompressedCorrectionWord {
 const CW_LEN: usize = 24;
 
 impl FSSKey for LeKey {
-    // 4 + 16 + 36 * (4 * 8) + 4 * (4 * 8 + 1)
-    const key_len: usize = 1304;
+    // 4 + 16 + 24 * (4 * 8) + 4 * (4 * 8 + 1)
+    const key_len: usize = 920;
 
     unsafe fn to_raw_line(&self, key_pointer: *mut u8) {
         // Cast the output line to a raw pointer.
@@ -144,18 +144,17 @@ pub fn h(prg: &mut impl PRG, seed: u128) -> CorrectionWord {
 
     let out = prg.expand(seed);
 
-    // TODO: update prg for u32 sigma
-
     // Get the randomness and chop the control bits.
-    let mut s_l = out[0] >> 1 << 1;
-    let mut z_l = (out[1] >> 1 << 1) as u32;
-    let mut s_r = out[2] >> 1 << 1;
-    let mut z_r = (out[3] >> 1 << 1) as u32;
+    let s_l = out[0];
+    let s_r = out[1];
+    let z_l = out[2] as u32;
+    let z_r = (out[2] >> 32) as u32;
 
-    let t_l = (out[0] & 1u128) as u8;
-    let u_l = (out[1] & 1u128) as u8;
-    let t_r = (out[2] & 1u128) as u8;
-    let u_r = (out[3] & 1u128) as u8;
+    // TODO: A 3x expansion PRG is slightly overkill
+    let t_l = (out[2] >> 64) as u8 & 1u8;
+    let u_l = (out[2] >> 65) as u8 & 1u8;
+    let t_r = (out[2] >> 66) as u8 & 1u8;
+    let u_r = (out[2] >> 67) as u8 & 1u8;
 
     CorrectionWord {
         s_l,

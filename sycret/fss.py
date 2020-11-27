@@ -83,5 +83,5 @@ class EqFactory(FSSFactory):
 
 class LeFactory(FSSFactory):
     def __init__(self, n_threads=0):
-        super().__init__(key_len=1304, n_threads=n_threads, op_id=1)
+        super().__init__(key_len=920, n_threads=n_threads, op_id=1)
 
