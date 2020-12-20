@@ -38,8 +38,8 @@ class FSSFactory:
 
     def keygen(self, n_values=1):
         # Allocate memory.
-        keys_a = np.zeros((n_values + 1, self.key_len), dtype=self.key_type)
-        keys_b = np.zeros((n_values + 1, self.key_len), dtype=self.key_type)
+        keys_a = np.zeros((n_values, self.key_len), dtype=self.key_type)
+        keys_b = np.zeros((n_values, self.key_len), dtype=self.key_type)
 
         # Convert types.
         r_keys_a = _as_u8_array(keys_a)

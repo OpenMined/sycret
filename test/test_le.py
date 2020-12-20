@@ -16,8 +16,8 @@ def test_multiline(n_values, n_loops=16):
 
         # Reshape to a C-contiguous array (necessary for from_buffer)
 
-        alpha_a = np.frombuffer(np.ascontiguousarray(keys_a[1:, 0:4]), dtype=np.uint32)
-        alpha_b = np.frombuffer(np.ascontiguousarray(keys_b[1:, 0:4]), dtype=np.uint32)
+        alpha_a = np.frombuffer(np.ascontiguousarray(keys_a[:, 0:4]), dtype=np.uint32)
+        alpha_b = np.frombuffer(np.ascontiguousarray(keys_b[:, 0:4]), dtype=np.uint32)
         alpha = alpha_a + alpha_b
 
         x = alpha.astype(np.int64)

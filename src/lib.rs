@@ -38,23 +38,14 @@ pub unsafe extern "C" fn keygen(
 
     let (n_aes_keys, keylen, n_aes_streams) = build_params(op_id);
 
-    // Generate AES-128 keys for MMO (expansion factor 2 or 4)
-    let mut rng = rand::thread_rng();
+    // Harcoded AES-128 keys for MMO
     let mut aes_keys = Vec::new();
-    // let aes_keys: [u128; n_aes_keys] = rng.gen();
-    // let aes_keys: Vec<u128> = rng.sample_iter(Uniform).take(n_aes_keys).collect();
-
-    // Write the AES key to the first line of the key block.
-    // The rest of the line is empty (we keep a Numpy array shape).
     for i in 0..n_aes_keys {
-        let aes_key = rng.gen();
-        aes_keys.push(aes_key);
-        utils::write_aes_key_to_raw_line(aes_key, keys_a_pointer.add(L * i) as *mut u8);
-        utils::write_aes_key_to_raw_line(aes_key, keys_b_pointer.add(L * i) as *mut u8);
+        aes_keys.push(i as u128);
     }
 
     let mut key_stream_args = vec![];
-    let mut line_counter = 1; // The first line is taken by the AES key.
+    let mut line_counter = 0;
     let default_length = n_values / n_aes_streams;
     let n_longer_streams = n_values % n_aes_streams;
     let mut stream_length: usize;
@@ -115,12 +106,10 @@ pub unsafe extern "C" fn eval(
 
     let (n_aes_keys, keylen, n_aes_streams) = build_params(op_id);
 
-    // Read the AES keys from the first line of the key block.
+    // Harcoded AES-128 keys for MMO
     let mut aes_keys = Vec::new();
     for i in 0..n_aes_keys {
-        aes_keys.push(utils::read_aes_key_from_raw_line(
-            keys_pointer.add(L * i) as *mut u8
-        ));
+        aes_keys.push(i as u128);
     }
 
     let mut key_stream_args = vec![];
@@ -143,10 +132,9 @@ pub unsafe extern "C" fn eval(
                 stream_id,
                 stream_length,
                 xs_pointer.add(N * line_counter) as usize,
-                keys_pointer.add(keylen * (line_counter + 1)) as usize,
+                keys_pointer.add(keylen * line_counter) as usize,
                 results_pointer.add(line_counter) as usize,
             ));
-            // The first line is taken by the AES key.
             line_counter += stream_length;
         }
     }

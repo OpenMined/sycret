@@ -101,17 +101,6 @@ pub fn eval_key_stream(
                 let result: u32 = key.eval(&mut prg, party_id, x);
                 *(result_ptr_p.add(line_counter)) = result as i64;
             }
-
-            // let key_ptr: *const [u8; LE_KEY_LEN] =
-            //     slice::from_raw_parts(key_pointer_p.add(LE_KEY_LEN * line_counter), LE_KEY_LEN).as_ptr()
-            //         as *const [u8; LE_KEY_LEN];
-            // let key = read_key_from_array(&*key_ptr);
-
-            // Run the evaluation
-            // TODO: Z/2Z
-            // TODO: wrap around if too large
-
-            // Write the result in a raw line for Numpy
         }
     }
 }
