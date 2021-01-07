@@ -153,11 +153,11 @@ fn generate_cw_from_seeds(
         let (s_b_l, t_b_l, s_b_r, t_b_r) = g_127_tuple_aes_u128(s_b_i);
 
         // Keep left if a_i = 0, keep right if a_i = 1.
-        let (s_a_keep, s_a_loose, t_a_keep) = match alpha_bits[i] {
+        let (s_a_keep, s_a_lose, t_a_keep) = match alpha_bits[i] {
             0u8 => (s_a_l, s_a_r, t_a_l),
             _ => (s_a_r, s_a_l, t_a_r),
         };
-        let (s_b_keep, s_b_loose, t_b_keep) = match alpha_bits[i] {
+        let (s_b_keep, s_b_lose, t_b_keep) = match alpha_bits[i] {
             0u8 => (s_b_l, s_b_r, t_b_l),
             _ => (s_b_r, s_b_l, t_b_r),
         };
@@ -170,7 +170,7 @@ fn generate_cw_from_seeds(
         };
 
         // Optimized DPF: re-use the randomness we didn't keep to seed next round.
-        cw[i] = s_a_loose ^ s_b_loose;
+        cw[i] = s_a_lose ^ s_b_lose;
         t_l[i] = t_cw_l;
         t_r[i] = t_cw_r;
 
