@@ -1,4 +1,5 @@
 site_name: Sycret
+repo_url: https://github.com/OpenMined/sycret
 theme:
   name: material
   features:
@@ -7,6 +8,8 @@ theme:
     # - navigation.tabs.sticky
     - navigation.sections
     # - toc.integrate
+  icon:
+    repo: fontawesome/brands/github
 plugins:
   - search
   - mkdocstrings
