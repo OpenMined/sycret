@@ -1,0 +1,16 @@
+site_name: Sycret
+theme:
+  name: material
+  features:
+    - navigation.instant
+    # - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.sections
+    # - toc.integrate
+plugins:
+  - search
+  - mkdocstrings
+# nav:
+#   - "index.md"
+#   - "python.md"
+#   - "rust.md"

@@ -2,12 +2,14 @@ import numpy as np
 from .sycret import lib
 from .utils import _as_u8_array, _as_usize, _as_i64_array
 
-# TODO: type annotation and comments
-
 # TODO: add some utilities to interact with the keys,
 # (e.g. get alpha share for the tests)
 # No need for a class for the key (overhead)
 class FSSFactory:
+    """
+    A generic class wrapping some constants and methods for FSS key generation and evaluation.
+    """
+
     def __init__(
         self,
         key_len,
@@ -21,6 +23,21 @@ class FSSFactory:
         lib_eval=lib.eval,
         op_id=1,
     ):
+        """
+        Initializes some constants for FSS.
+
+        Args:
+            key_len ([type]): [description]
+            n_threads (int, optional): [description]. Defaults to 0.
+            x_type ([type], optional): [description]. Defaults to np.int64.
+            key_type ([type], optional): [description]. Defaults to np.uint8.
+            result_type ([type], optional): [description]. Defaults to np.int64.
+            N (int, optional): [description]. Defaults to 4.
+            L (int, optional): [description]. Defaults to 16.
+            lib_keygen ([type], optional): [description]. Defaults to lib.keygen.
+            lib_eval ([type], optional): [description]. Defaults to lib.eval.
+            op_id (int, optional): [description]. Defaults to 1.
+        """
         # NOTE: these defaults work for both equality and comparison,
         # but new primitives can override them if necessary.
 
@@ -37,6 +54,14 @@ class FSSFactory:
         return
 
     def keygen(self, n_values=1):
+        """[summary]
+
+        Args:
+            n_values (int, optional): [description]. Defaults to 1.
+
+        Returns:
+            [type]: [description]
+        """
         # Allocate memory.
         keys_a = np.zeros((n_values, self.key_len), dtype=self.key_type)
         keys_b = np.zeros((n_values, self.key_len), dtype=self.key_type)
@@ -53,6 +78,17 @@ class FSSFactory:
         return keys_a, keys_b
 
     def eval(self, party_id, xs, keys, n_threads=0):
+        """[summary]
+
+        Args:
+            party_id ([type]): [description]
+            xs ([type]): [description]
+            keys ([type]): [description]
+            n_threads (int, optional): [description]. Defaults to 0.
+
+        Returns:
+            [type]: [description]
+        """
         n_values = xs.shape[0]
         results = np.zeros(n_values, dtype=self.result_type)
 
@@ -77,11 +113,19 @@ class FSSFactory:
 
 
 class EqFactory(FSSFactory):
+    """
+    Distributed Point Function
+    """
+
     def __init__(self, n_threads=0):
         super().__init__(key_len=621, n_threads=n_threads, op_id=0)
 
 
 class LeFactory(FSSFactory):
+    """
+    Distributed Interval Functino
+    """
+
     def __init__(self, n_threads=0):
         super().__init__(key_len=920, n_threads=n_threads, op_id=1)
 
