@@ -93,7 +93,7 @@ impl FSSKey for EqKey {
         // Compare the bit decomposition of x with the special path.
         let x_bits: Vec<u8> = bit_decomposition_u32(x);
         for i in 0..(N * 8) {
-            let (s_l, t_l, s_r, t_r) = g_127_tuple_aes_u128(s_i);
+            let (s_l, t_l, s_r, t_r) = g(prg, s_i);
             let s_cw = self.cw[i];
             let t_cw_l = self.t_l[i];
             let t_cw_r = self.t_r[i];
@@ -149,8 +149,8 @@ fn generate_cw_from_seeds(
 
     for i in 0..(N * 8) {
         // Keep only 1 bit instead of a byte for t_l and t_r (not optimal)
-        let (s_a_l, t_a_l, s_a_r, t_a_r) = g_127_tuple_aes_u128(s_a_i);
-        let (s_b_l, t_b_l, s_b_r, t_b_r) = g_127_tuple_aes_u128(s_b_i);
+        let (s_a_l, t_a_l, s_a_r, t_a_r) = g(prg, s_a_i);
+        let (s_b_l, t_b_l, s_b_r, t_b_r) = g(prg, s_b_i);
 
         // Keep left if a_i = 0, keep right if a_i = 1.
         let (s_a_keep, s_a_lose, t_a_keep) = match alpha_bits[i] {
@@ -226,6 +226,22 @@ pub fn g_127_tuple_aes_u128(seed: u128) -> (u128, u8, u128, u8) {
     let mut s_r = u128::from_le_bytes(right_bytes.try_into().unwrap());
     let t_r = output[L] & 1u8;
     s_r = s_r >> 1 << 1;
+
+    (s_l, t_l, s_r, t_r)
+}
+
+///
+/// Wrapper around a PRG with expansion factor 2
+///
+pub fn g(prg: &mut impl PRG, seed: u128) -> (u128, u8, u128, u8) {
+    assert_eq!(L, 128 / 8);
+
+    let out = prg.expand(seed);
+
+    let t_l = out[0] as u8 & 1u8;
+    let t_r = out[1] as u8 & 1u8;
+    let s_l = out[0] >> 1 << 1;
+    let s_r = out[1] >> 1 << 1;
 
     (s_l, t_l, s_r, t_r)
 }
