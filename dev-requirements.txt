@@ -22,7 +22,7 @@ click==7.1.2
 colorama==0.4.3
 coverage==5.2
 crc32c==2.0.1
-cryptography==2.9.2
+cryptography==3.2
 decorator==4.4.2
 defusedxml==0.7.0rc1
 distlib==0.3.1
