@@ -2,6 +2,8 @@
 
 Python library for [Function Secret Sharing](https://eprint.iacr.org/2018/707) with an efficient Rust backend using the AES-NI hardware acceleration. It is used in [PySyft](https://github.com/OpenMined/PySyft) for [ARIANN: Low-Interaction Privacy-Preserving Deep Learning via Function Secret Sharing](https://arxiv.org/abs/2006.04593).
 
+**Disclaimer.** Sycret is not production-ready yet. It is intended for research and prototyping purposes. 
+
 
 ## Installation
 
