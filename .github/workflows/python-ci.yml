@@ -46,7 +46,7 @@ jobs:
           mypy src || echo "Type errors found, continuing build..."
       - name: Check docstring coverage
         run: |
-          interrogate -mvp sycret/ -f 52.5
+          interrogate -mvp sycret/ -f 33.0
       - name: Scan for security issues
         run: |
           bandit -r sycret -ll
