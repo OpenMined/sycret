@@ -34,6 +34,7 @@ repos:
     rev: 3.8.4
     hooks:
       - id: flake8
+        exclude: sycret/sycret/
 
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.0

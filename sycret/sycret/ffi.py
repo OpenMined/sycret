@@ -1,4 +1,3 @@
-# flake8: noqa
 # auto-generated file
 # third party
 import _cffi_backend
