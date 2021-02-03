@@ -39,7 +39,7 @@ idna==2.8
 imagesize==1.2.0
 importlib-metadata==1.7.0
 importlib-resources==1.5.0
-interrogate==1.2.0
+interrogate>=1.2.0
 ipykernel==5.3.2
 ipython==7.16.1
 ipython-genutils==0.2.0
