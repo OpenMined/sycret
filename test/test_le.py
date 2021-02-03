@@ -1,7 +1,6 @@
+# third party
 import numpy as np
-import argparse
 import pytest
-import sys
 
 import sycret
 
@@ -50,4 +49,3 @@ def test_multiline(n_values, n_loops=16):
 
 if __name__ == "__main__":
     test_multiline(10)
-
