@@ -34,11 +34,15 @@ jobs:
         run: |
           sudo apt-get update
           python -m pip install --upgrade pip
+          pip install virtualenv
+          virtualenv venv
+          source venv/bin/activate
           pip install -r dev-requirements.txt
-          maturin build -b cffi --release
+          maturin develop -b cffi --release
       - name: Lint, format, and type-check
         run: |
           # Stop the build if there are Python syntax errors or undefined names
+          source venv/bin/activate
           flake8 --config=.flake8 .
           black --check .
           isort --check-only .
@@ -47,10 +51,13 @@ jobs:
           mypy src || echo "Type errors found, continuing build..."
       - name: Check docstring coverage
         run: |
+          source venv/bin/activate
           interrogate -mvp sycret/ -f 33.0
       - name: Scan for security issues
         run: |
+          source venv/bin/activate
           bandit -r sycret -ll
       - name: Run tests
         run: |
+          source venv/bin/activate
           pytest test
