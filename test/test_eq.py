@@ -1,7 +1,11 @@
-import sycret
-import numpy as np
+# stdlib
 import argparse
+
+# third party
+import numpy as np
 import pytest
+
+import sycret
 
 
 def test_simple_raw_eq():
