@@ -1,0 +1,63 @@
+name: Python Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**.py"
+      - ".github/workflows/python-ci.yml"
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "**.py"
+      - ".github/workflows/python-ci.yml"
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          python -m pip install --upgrade pip
+          pip install virtualenv
+          virtualenv venv
+          source venv/bin/activate
+          pip install -r dev-requirements.txt
+          maturin develop -b cffi --release
+      - name: Lint, format, and type-check
+        run: |
+          # Stop the build if there are Python syntax errors or undefined names
+          source venv/bin/activate
+          flake8 --config=.flake8 --exclude=./sycret/sycret/,./venv/ .
+          black --check . --exclude '/sycret/sycret/*'
+          isort --check-only . -s sycret/sycret/ -s venv/
+          # Run type checker in CI such that type errors can be identified and gradually addressed.
+          # Once all existing type errors are addressed, the `|| echo` after the mypy call can be removed.
+          mypy sycret || echo "Type errors found, continuing build..."
+      - name: Check docstring coverage
+        run: |
+          source venv/bin/activate
+          interrogate -mvp sycret/ -f 33.0
+      - name: Scan for security issues
+        run: |
+          source venv/bin/activate
+          bandit -r sycret -ll
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          pytest test

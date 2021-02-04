@@ -1,0 +1,151 @@
+name: Rust Tests
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "**.rs"
+      - ".github/workflows/rust-ci.yml"
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "**.rs"
+      - ".github/workflows/rust-ci.yml"
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Rust environment
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features --verbose --release --all
+      - name: Run slow tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features --verbose --release --all -- --ignored
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Rust environment
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: cargo fetch
+        uses: actions-rs/cargo@v1
+        with:
+          command: fetch
+      - name: Build for target
+        run: cargo build --verbose --no-default-features
+
+  bitrot:
+    name: Bitrot check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Rust environment
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      # Build benchmarks to prevent bitrot
+      - name: Build benchmarks
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all --benches
+
+  clippy:
+    name: Clippy
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Rust environment
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: clippy
+          override: true
+      - name: Run clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          name: Clippy
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features --all-targets -- -D warnings
+
+  codecov:
+    name: Code coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      # Use stable for this to ensure that cargo-tarpaulin can be built.
+      - name: Setup Rust environment
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Install cargo-tarpaulin
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-tarpaulin
+
+      - name: Generate coverage report
+        uses: actions-rs/cargo@v1
+        with:
+          command: tarpaulin
+          args: --all-features --release --timeout 600 --out Xml
+
+  fmt:
+    name: Rustfmt
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Rust environment
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      # cargo fmt does not build the code, and running it in a fresh clone of
+      # the codebase will fail because the protobuf code has not been generated.
+      - name: cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all
+
+      # Ensure all code has been formatted with rustfmt
+      - run: rustup component add rustfmt
+      - name: Check formatting
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check

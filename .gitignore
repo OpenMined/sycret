@@ -133,3 +133,6 @@ dmypy.json
 
 /target
 Cargo.lock
+
+# VSCode
+.vscode

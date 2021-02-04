@@ -1,5 +1,5 @@
-import numpy as np
 from .sycret import ffi
+
 
 def _as_u64_array(np_uint64_array):
     return ffi.cast("unsigned long *", np_uint64_array.ctypes.data)
