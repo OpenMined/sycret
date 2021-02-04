@@ -99,7 +99,8 @@ jobs:
         with:
           name: Clippy
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features --all-targets -- -D warnings
+          # args: --all-features --all-targets -- -D warnings
+          args: --all-features --all-targets
 
   codecov:
     name: Code coverage
