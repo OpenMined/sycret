@@ -1,5 +1,9 @@
 name: Rust Tests
 
+# Ask the Rust compiler to use AESNI
+env:
+  RUSTFLAGS: "-C target-feature=+aes,+ssse3"
+
 on:
   push:
     branches:
