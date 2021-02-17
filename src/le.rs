@@ -4,7 +4,7 @@ use std::fmt;
 use std::num::Wrapping;
 use std::slice;
 
-use super::stream::{FSSKey, PRG};
+use super::stream::{FSSKey, RawKey, PRG};
 use super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
 use super::{L, N};
 
@@ -51,7 +51,7 @@ pub struct CompressedCorrectionWord {
 
 const CW_LEN: usize = 24;
 
-impl FSSKey for LeKey {
+impl RawKey for LeKey {
     // 4 + 16 + 24 * (4 * 8) + 4 * (4 * 8 + 1)
     const key_len: usize = 920;
 
@@ -71,7 +71,9 @@ impl FSSKey for LeKey {
             as *const [u8; Self::key_len];
         read_key_from_array(&*key_ptr)
     }
+}
 
+impl FSSKey for LeKey {
     fn generate_keypair(prg: &mut impl PRG) -> (Self, Self) {
         // Thread randomness for parallelization.
         let mut rng = rand::thread_rng();
@@ -137,9 +139,6 @@ impl FSSKey for LeKey {
 }
 
 pub fn h(prg: &mut impl PRG, seed: u128) -> CorrectionWord {
-    // This is an awkward prototype
-
-    // TODO: optimize format, byte operations, assembly call to AESNI (e.g. https://github.com/gendx/haraka-rs/blob/master/src/intrinsics.rs)
     assert_eq!(L, 128 / 8);
 
     let out = prg.expand(seed);

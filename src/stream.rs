@@ -6,15 +6,17 @@ use super::utils::MMO;
 use super::{L, N};
 
 pub trait FSSKey: Sized {
+    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
+
+    fn generate_keypair(prg: &mut impl PRG) -> (Self, Self);
+}
+
+pub trait RawKey: Sized {
     const key_len: usize;
 
     unsafe fn from_raw_line(raw_line_pointer: *const u8) -> Self;
 
     unsafe fn to_raw_line(&self, raw_line_pointer: *mut u8);
-
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
-
-    fn generate_keypair(prg: &mut impl PRG) -> (Self, Self);
 }
 
 // Keyed PRG

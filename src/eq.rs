@@ -1,3 +1,7 @@
+//!  
+//! Equality keys tailored for AriaNN
+//!
+
 use aesni::cipher::generic_array::GenericArray;
 use aesni::cipher::{NewStreamCipher, StreamCipher, SyncStreamCipher};
 use aesni::{Aes128, Aes128Ctr};
@@ -8,7 +12,7 @@ use std::fmt;
 use std::num::Wrapping;
 use std::slice;
 
-use super::stream::{FSSKey, PRG};
+use super::stream::{FSSKey, PRG, RawKey};
 use super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
 use super::{L, N};
 
@@ -22,7 +26,7 @@ pub struct EqKey {
     pub cw_leaf: u32,
 }
 
-impl FSSKey for EqKey {
+impl RawKey for EqKey {
     const key_len: usize = 621;
 
     unsafe fn to_raw_line(&self, key_pointer: *mut u8) {
@@ -41,7 +45,9 @@ impl FSSKey for EqKey {
             as *const [u8; Self::key_len];
         read_key_from_array(&*key_ptr)
     }
+}
 
+impl FSSKey for EqKey {
     fn generate_keypair(prg: &mut impl PRG) -> (Self, Self) {
         // Thread randomness for parallelization.
         let mut rng = rand::thread_rng();
@@ -124,10 +130,10 @@ impl FSSKey for EqKey {
 }
 
 ///
-/// Internal deterministic function
+/// Deterministic function
 ///
 // #[flame]
-fn generate_cw_from_seeds(
+pub fn generate_cw_from_seeds(
     prg: &mut impl PRG,
     alpha: u32,
     s_a: u128,
