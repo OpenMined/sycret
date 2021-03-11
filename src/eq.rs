@@ -3,17 +3,17 @@
 //!
 
 use aesni::cipher::generic_array::GenericArray;
-use aesni::cipher::{NewStreamCipher, StreamCipher, SyncStreamCipher};
-use aesni::{Aes128, Aes128Ctr};
+use aesni::cipher::{NewStreamCipher, SyncStreamCipher};
 
-use rand::{thread_rng, Rng};
+
+use rand::{Rng};
 use std::convert::TryInto;
-use std::fmt;
-use std::num::Wrapping;
+
+
 use std::slice;
 
 use super::stream::{FSSKey, PRG, RawKey};
-use super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
+use super::utils::{bit_decomposition_u32, compute_out, share_leaf};
 use super::{L, N};
 
 #[derive(Debug)]

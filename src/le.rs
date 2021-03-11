@@ -1,11 +1,11 @@
-use rand::{thread_rng, Rng};
+use rand::{Rng};
 use std::convert::TryInto;
 use std::fmt;
-use std::num::Wrapping;
+
 use std::slice;
 
 use super::stream::{FSSKey, RawKey, PRG};
-use super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
+use super::utils::{bit_decomposition_u32, compute_out, share_leaf};
 use super::{L, N};
 
 pub struct LeKey {
