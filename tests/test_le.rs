@@ -1,11 +1,9 @@
 use rand::Rng;
 
-// TODO: awkward imports?
-
 extern crate sycret;
-pub use sycret::le::*;
-pub use sycret::stream::{FSSKey, PRG};
-pub use sycret::utils::MMO;
+use sycret::le::*;
+use sycret::stream::{FSSKey, PRG};
+use sycret::utils::MMO;
 
 fn eval_on_alpha_with_offset(offset: i32) -> (u32, u32) {
     println!("\n\nOffset {}", offset);

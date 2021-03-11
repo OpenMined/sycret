@@ -2,8 +2,11 @@
 //! Generic DPF implementation
 //!  
 
-use super::eq::generate_keypair;
-use super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
+use super::super::eq::{g, generate_cw_from_seeds};
+use super::super::stream::PRG;
+use super::super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
+use super::super::{L, N};
+use rand::{thread_rng, Rng};
 
 /// DPF Key for alpha in u32 given at Keygen time and beta = 1
 #[derive(Debug)]
@@ -15,7 +18,13 @@ pub struct DPFKeyAlpha1 {
     pub cw_leaf: u32,
 }
 
-impl FSSKey for DPFKeyAlpha1 {
+pub trait DPFKey1: Sized {
+    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
+
+    fn generate_keypair(prg: &mut impl PRG, alpha: u32) -> (Self, Self);
+}
+
+impl DPFKey1 for DPFKeyAlpha1 {
     fn generate_keypair(prg: &mut impl PRG, alpha: u32) -> (Self, Self) {
         // Thread randomness for parallelization.
         let mut rng = rand::thread_rng();
@@ -33,14 +42,14 @@ impl FSSKey for DPFKeyAlpha1 {
 
         // Return a key pair.
         (
-            EqKey {
+            DPFKeyAlpha1 {
                 s: s_a,
                 cw,
                 t_l,
                 t_r,
                 cw_leaf,
             },
-            EqKey {
+            DPFKeyAlpha1 {
                 s: s_b,
                 cw,
                 t_l,

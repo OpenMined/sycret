@@ -56,6 +56,7 @@ pub struct MMO {
     pub ciphers: Vec<Aes128>,
 }
 
+// TODO: hardcode the default keys
 impl PRG for MMO {
     fn from_slice(aes_keys: &[u128]) -> MMO {
         let mut ciphers = vec![];

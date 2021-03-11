@@ -4,6 +4,7 @@ use rand::{thread_rng, Rng};
 use rayon::prelude::*;
 
 pub mod eq;
+pub mod fss;
 pub mod le;
 pub mod stream;
 pub mod utils;
