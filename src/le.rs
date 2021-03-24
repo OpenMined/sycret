@@ -1,4 +1,4 @@
-use rand::{Rng};
+use rand::Rng;
 use std::convert::TryInto;
 use std::fmt;
 
@@ -168,7 +168,7 @@ pub fn h(prg: &mut impl PRG, seed: u128) -> CorrectionWord {
 }
 
 /// Internal deterministic function.
-fn generate_cw_from_seeds(
+pub fn generate_cw_from_seeds(
     prg: &mut impl PRG,
     alpha: u32,
     s_a: u128,
@@ -270,7 +270,7 @@ fn generate_cw_from_seeds(
     (cw, cw_leaf)
 }
 
-fn xor_2_words(u: &CorrectionWord, v: &CorrectionWord) -> CorrectionWord {
+pub fn xor_2_words(u: &CorrectionWord, v: &CorrectionWord) -> CorrectionWord {
     CorrectionWord {
         s_l: u.s_l ^ v.s_l,
         t_l: u.t_l ^ v.t_l,
@@ -311,7 +311,7 @@ fn compress_word(w: &CorrectionWord, alpha_i: u8) -> CompressedCorrectionWord {
     }
 }
 
-fn decompress_word(w: &CompressedCorrectionWord) -> CorrectionWord {
+pub fn decompress_word(w: &CompressedCorrectionWord) -> CorrectionWord {
     CorrectionWord {
         z_l: w.z,
         s_l: w.s,

@@ -1,12 +1,12 @@
 //!
 //! Generic DPF implementation
-//!  
+//!
 
 use super::super::eq::{g, generate_cw_from_seeds};
 use super::super::stream::PRG;
 use super::super::utils::{bit_decomposition_u32, compute_out};
-use super::super::{N};
-use rand::{Rng};
+use super::super::N;
+use rand::Rng;
 
 /// DPF Key for alpha in u32 given at Keygen time and beta = 1
 #[derive(Debug)]

@@ -4,7 +4,7 @@ use aesni::Aes128;
 use std::slice;
 
 use super::stream::PRG;
-use super::{L};
+use super::L;
 
 pub fn share_leaf(mask_a: u32, mask_b: u32, share_bit: u8, flip_bit: u8) -> u32 {
     let mut leaf = mask_b.wrapping_sub(mask_a).wrapping_add(share_bit as u32);

@@ -1,6 +1,3 @@
-
-
-
 use rayon::prelude::*;
 
 pub mod eq;

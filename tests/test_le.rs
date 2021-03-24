@@ -6,18 +6,14 @@ use sycret::stream::{FSSKey, PRG};
 use sycret::utils::MMO;
 
 fn eval_on_alpha_with_offset(offset: i32) -> (u32, u32) {
-    println!("\n\nOffset {}", offset);
     let mut rng = rand::thread_rng();
     let aes_keys: [u128; 4] = rng.gen();
     let mut prg = MMO::from_slice(&aes_keys);
 
     let (k_a, k_b) = LeKey::generate_keypair(&mut prg);
 
-    println!("keys: {:#?} {:#?}", k_a, k_b);
-
     // Recover alpha from the shares
     let mut alpha: u32 = k_a.alpha_share.wrapping_add(k_b.alpha_share);
-    println!("alpha:\n {:b}", alpha);
 
     // Add some offset
     if offset > 0 {
@@ -34,7 +30,6 @@ fn eval_on_alpha_with_offset(offset: i32) -> (u32, u32) {
 
     let mut prg = MMO::from_slice(&aes_keys);
     let b_output = k_b.eval(&mut prg, 1, alpha);
-    println!("a, b: {}, {}", a_output, b_output);
 
     (a_output, b_output)
 }

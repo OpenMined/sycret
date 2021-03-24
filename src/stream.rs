@@ -3,7 +3,7 @@ use std::slice;
 use super::eq::EqKey;
 use super::le::LeKey;
 use super::utils::MMO;
-use super::{N};
+use super::N;
 
 pub trait FSSKey: Sized {
     fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;

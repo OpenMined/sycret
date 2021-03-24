@@ -1,18 +1,16 @@
-//!  
+//!
 //! Equality keys tailored for AriaNN
 //!
 
 use aesni::cipher::generic_array::GenericArray;
 use aesni::cipher::{NewStreamCipher, SyncStreamCipher};
 
-
-use rand::{Rng};
+use rand::Rng;
 use std::convert::TryInto;
-
 
 use std::slice;
 
-use super::stream::{FSSKey, PRG, RawKey};
+use super::stream::{FSSKey, RawKey, PRG};
 use super::utils::{bit_decomposition_u32, compute_out, share_leaf};
 use super::{L, N};
 
