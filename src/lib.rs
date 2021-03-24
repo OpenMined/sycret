@@ -69,7 +69,7 @@ pub unsafe extern "C" fn keygen(
     }
 
     // Each thread will repeatedly execute this closure in parallel
-    let create_keypair = |key_stream_arg: &(usize, usize, usize, usize)| -> () {
+    let create_keypair = |key_stream_arg: &(usize, usize, usize, usize)| {
         let (stream_id, stream_length, key_a_pointer, keys_b_pointer) = *key_stream_arg;
         stream::generate_key_stream(
             &aes_keys,
@@ -138,7 +138,7 @@ pub unsafe extern "C" fn eval(
     }
 
     // Each thread will repeatedly execute this closure in parallel
-    let eval_key = |key_stream_arg: &(usize, usize, usize, usize, usize)| -> () {
+    let eval_key = |key_stream_arg: &(usize, usize, usize, usize, usize)| {
         let (stream_id, stream_length, x_pointer, key_pointer, result_pointer) = *key_stream_arg;
         stream::eval_key_stream(
             party_id as u8,

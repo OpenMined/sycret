@@ -67,7 +67,7 @@ impl PRG for MMO {
         }
         MMO {
             // expansion_factor: ciphers.len(),
-            ciphers: ciphers,
+            ciphers,
         }
     }
 
@@ -80,7 +80,7 @@ impl PRG for MMO {
         }
         MMO {
             // expansion_factor: ciphers.len(),
-            ciphers: ciphers,
+            ciphers,
         }
     }
 
