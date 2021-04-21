@@ -1,9 +1,13 @@
+//!
+//! Utilities to iterate over Numpy arrays
+//!
+
 use std::slice;
 
-use super::eq::EqKey;
-use super::le::LeKey;
-use super::utils::MMO;
-use super::N;
+use crate::eq::EqKey;
+use crate::le::LeKey;
+use crate::utils::MMO;
+use crate::N;
 
 pub trait FSSKey: Sized {
     fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
