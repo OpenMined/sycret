@@ -1,16 +1,16 @@
-use aesni::cipher::generic_array::GenericArray;
-use aesni::cipher::{NewStreamCipher, StreamCipher, SyncStreamCipher};
-use aesni::{Aes128, Aes128Ctr};
+//!
+//! Equality keys tailored for AriaNN
+//!
 
-use rand::{thread_rng, Rng};
+use rand::Rng;
 use std::convert::TryInto;
-use std::fmt;
-use std::num::Wrapping;
+
 use std::slice;
 
-use super::stream::{FSSKey, PRG};
-use super::utils::{bit_decomposition_u32, compute_out, share_leaf, MMO};
-use super::{L, N};
+use crate::fss::dpf::{g, generate_cw_from_seeds};
+use crate::stream::{FSSKey, RawKey, PRG};
+use crate::utils::{bit_decomposition_u32, compute_out};
+use crate::{L, N};
 
 #[derive(Debug)]
 pub struct EqKey {
@@ -22,7 +22,7 @@ pub struct EqKey {
     pub cw_leaf: u32,
 }
 
-impl FSSKey for EqKey {
+impl RawKey for EqKey {
     const key_len: usize = 621;
 
     unsafe fn to_raw_line(&self, key_pointer: *mut u8) {
@@ -41,7 +41,9 @@ impl FSSKey for EqKey {
             as *const [u8; Self::key_len];
         read_key_from_array(&*key_ptr)
     }
+}
 
+impl FSSKey for EqKey {
     fn generate_keypair(prg: &mut impl PRG) -> (Self, Self) {
         // Thread randomness for parallelization.
         let mut rng = rand::thread_rng();
@@ -121,129 +123,6 @@ impl FSSKey for EqKey {
         }
         compute_out(s_i as u32, self.cw_leaf, t_i, party_id)
     }
-}
-
-///
-/// Internal deterministic function
-///
-// #[flame]
-fn generate_cw_from_seeds(
-    prg: &mut impl PRG,
-    alpha: u32,
-    s_a: u128,
-    s_b: u128,
-    cw: &mut [u128; N * 8],
-    t_l: &mut [u8; N * 8],
-    t_r: &mut [u8; N * 8],
-) -> u32 {
-    // Initialize control bits.
-    let mut t_a_i = 0u8;
-    let mut t_b_i = 1u8;
-
-    // Seeds at level i.
-    let mut s_a_i: u128 = s_a;
-    let mut s_b_i: u128 = s_b;
-
-    // Iterate over the bits of alpha
-    let alpha_bits = bit_decomposition_u32(alpha);
-
-    for i in 0..(N * 8) {
-        // Keep only 1 bit instead of a byte for t_l and t_r (not optimal)
-        let (s_a_l, t_a_l, s_a_r, t_a_r) = g(prg, s_a_i);
-        let (s_b_l, t_b_l, s_b_r, t_b_r) = g(prg, s_b_i);
-
-        // Keep left if a_i = 0, keep right if a_i = 1.
-        let (s_a_keep, s_a_lose, t_a_keep) = match alpha_bits[i] {
-            0u8 => (s_a_l, s_a_r, t_a_l),
-            _ => (s_a_r, s_a_l, t_a_r),
-        };
-        let (s_b_keep, s_b_lose, t_b_keep) = match alpha_bits[i] {
-            0u8 => (s_b_l, s_b_r, t_b_l),
-            _ => (s_b_r, s_b_l, t_b_r),
-        };
-
-        let t_cw_l = t_a_l ^ t_b_l ^ alpha_bits[i] ^ 1u8;
-        let t_cw_r = t_a_r ^ t_b_r ^ alpha_bits[i];
-        let t_cw_keep = match alpha_bits[i] {
-            0u8 => t_cw_l,
-            _ => t_cw_r,
-        };
-
-        // Optimized DPF: re-use the randomness we didn't keep to seed next round.
-        cw[i] = s_a_lose ^ s_b_lose;
-        t_l[i] = t_cw_l;
-        t_r[i] = t_cw_r;
-
-        // For Alice: update the seed and value bit for next bit.
-        if t_a_i == 0 {
-            // Xoring with t_a_i * cw[i][0..L] does nothing.
-            s_a_i = s_a_keep;
-            t_a_i = t_a_keep;
-        } else {
-            s_a_i = s_a_keep ^ cw[i];
-            t_a_i = t_a_keep ^ t_cw_keep;
-        }
-
-        // Same update for Bob.
-        if t_b_i == 0 {
-            s_b_i = s_b_keep;
-            t_b_i = t_b_keep;
-        } else {
-            s_b_i = s_b_keep ^ cw[i];
-            t_b_i = t_b_keep ^ t_cw_keep;
-        }
-    }
-    // We only need 32 bits to make a sharing of 1
-    share_leaf(s_a_i as u32, s_b_i as u32, 1, t_b_i)
-}
-
-///
-/// A "slow" PRG before we try MMO here too
-///
-pub fn g_127_tuple_aes_u128(seed: u128) -> (u128, u8, u128, u8) {
-    assert_eq!(L, 128 / 8);
-
-    // Use the seed as the symmetric key.
-    let seed_slice = seed.to_le_bytes();
-    let key = GenericArray::from_slice(&seed_slice);
-
-    // The key is not reused for other data so we don't need a unique counter.
-    let nonce = GenericArray::from_slice(&[0u8; 16]);
-    let mut cipher = aesni::Aes128Ctr::new(&key, &nonce);
-
-    // Fixed plaintext.
-    let mut output = [0u8; 32];
-
-    // Encrypt the plaintext inplace.
-    cipher.apply_keystream(&mut output);
-    let left_bytes = &output[0..L];
-    let right_bytes = &output[L..(2 * L)];
-
-    // Chop the most significant bit for the control bit.
-    let mut s_l = u128::from_le_bytes(left_bytes.try_into().unwrap());
-    let t_l = output[0] & 1u8;
-    s_l = s_l >> 1 << 1;
-    let mut s_r = u128::from_le_bytes(right_bytes.try_into().unwrap());
-    let t_r = output[L] & 1u8;
-    s_r = s_r >> 1 << 1;
-
-    (s_l, t_l, s_r, t_r)
-}
-
-///
-/// Wrapper around a PRG with expansion factor 2
-///
-pub fn g(prg: &mut impl PRG, seed: u128) -> (u128, u8, u128, u8) {
-    assert_eq!(L, 128 / 8);
-
-    let out = prg.expand(seed);
-
-    let t_l = out[0] as u8 & 1u8;
-    let t_r = out[1] as u8 & 1u8;
-    let s_l = out[0] >> 1 << 1;
-    let s_r = out[1] >> 1 << 1;
-
-    (s_l, t_l, s_r, t_r)
 }
 
 ///

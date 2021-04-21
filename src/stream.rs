@@ -1,20 +1,26 @@
+//!
+//! Utilities to iterate over Numpy arrays
+//!
+
 use std::slice;
 
-use super::eq::EqKey;
-use super::le::LeKey;
-use super::utils::MMO;
-use super::{L, N};
+use crate::eq::EqKey;
+use crate::le::LeKey;
+use crate::utils::MMO;
+use crate::N;
 
 pub trait FSSKey: Sized {
+    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
+
+    fn generate_keypair(prg: &mut impl PRG) -> (Self, Self);
+}
+
+pub trait RawKey: Sized {
     const key_len: usize;
 
     unsafe fn from_raw_line(raw_line_pointer: *const u8) -> Self;
 
     unsafe fn to_raw_line(&self, raw_line_pointer: *mut u8);
-
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
-
-    fn generate_keypair(prg: &mut impl PRG) -> (Self, Self);
 }
 
 // Keyed PRG
@@ -33,7 +39,7 @@ pub trait PRG {
 
 pub fn generate_key_stream(
     aes_keys: &Vec<u128>,
-    stream_id: usize,
+    _stream_id: usize,
     stream_length: usize,
     key_a_pointer: usize,
     key_b_pointer: usize,
@@ -68,7 +74,7 @@ pub fn generate_key_stream(
 pub fn eval_key_stream(
     party_id: u8,
     aes_keys: &Vec<u128>,
-    stream_id: usize,
+    _stream_id: usize,
     stream_length: usize,
     x_pointer: usize,
     key_pointer: usize,

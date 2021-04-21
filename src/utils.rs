@@ -4,7 +4,7 @@ use aesni::Aes128;
 use std::slice;
 
 use super::stream::PRG;
-use super::{L, N};
+use super::L;
 
 pub fn share_leaf(mask_a: u32, mask_b: u32, share_bit: u8, flip_bit: u8) -> u32 {
     let mut leaf = mask_b.wrapping_sub(mask_a).wrapping_add(share_bit as u32);
@@ -56,6 +56,7 @@ pub struct MMO {
     pub ciphers: Vec<Aes128>,
 }
 
+// TODO: hardcode the default keys
 impl PRG for MMO {
     fn from_slice(aes_keys: &[u128]) -> MMO {
         let mut ciphers = vec![];
@@ -66,7 +67,7 @@ impl PRG for MMO {
         }
         MMO {
             // expansion_factor: ciphers.len(),
-            ciphers: ciphers,
+            ciphers,
         }
     }
 
@@ -79,7 +80,7 @@ impl PRG for MMO {
         }
         MMO {
             // expansion_factor: ciphers.len(),
-            ciphers: ciphers,
+            ciphers,
         }
     }
 
