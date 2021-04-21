@@ -23,4 +23,4 @@ import_heading_future = 'future'
 import_heading_stdlib = 'stdlib'
 import_heading_thirdparty = 'third party'
 ignore_comments = false
-honor_noqa = true 
+honor_noqa = true

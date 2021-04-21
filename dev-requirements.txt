@@ -11,7 +11,7 @@ Babel==2.8.0
 backcall==0.2.0
 bandit==1.6.2
 black==19.10b0
-bleach==3.1.5
+bleach==3.3.0
 bump2version==1.0.0
 bumpversion==0.6.0
 certifi==2020.6.20
@@ -58,7 +58,7 @@ keyring==21.3.0
 lazy-object-proxy==1.4.3
 livereload==2.6.3
 lunr==0.5.8
-lxml==4.5.2
+lxml==4.6.3
 lz4==3.0.2
 Markdown==3.3.3
 MarkupSafe==1.1.1
@@ -81,7 +81,7 @@ nest-asyncio==1.3.3
 netifaces==0.10.9
 nltk==3.5
 nodeenv==1.4.0
-notebook==5.7.8
+notebook==6.1.5
 numpy==1.18.5
 packaging==20.4
 pandocfilters==1.4.2
@@ -99,13 +99,13 @@ prompt-toolkit==3.0.5
 protobuf==3.12.2
 psutil==5.7.0
 ptyprocess==0.6.0
-py==1.9.0
+py==1.10.0
 pycodestyle==2.6.0
 pycparser==2.20
 pydash==4.8.0
 pyee==7.0.2
 pyflakes==2.2.0
-Pygments==2.6.1
+Pygments==2.7.4
 pylibsrtp==0.6.6
 pymdown-extensions==8.1
 pyOpenSSL==19.1.0
@@ -119,7 +119,7 @@ python-engineio==3.13.1
 python-socketio==4.6.0
 pytkdocs==0.10.1
 pytz==2020.1
-PyYAML==5.3.1
+PyYAML==5.4
 pyzmq==19.0.1
 readme-renderer==26.0
 regex==2020.7.14
@@ -129,7 +129,6 @@ rfc3986==1.4.0
 scipy==1.4.1
 SecretStorage==3.1.2
 Send2Trash==1.6.0b1
-shaloop==0.0.1a22
 six==1.15.0
 smmap==3.0.4
 snowballstemmer==2.0.0
