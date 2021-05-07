@@ -92,8 +92,8 @@ impl FSSKey for LeKey {
         assert!((party_id == 0u8) || (party_id == 1u8));
         let mut t_i: u8 = party_id;
         let mut s_i: u128 = self.s;
-        let mut u_i = 0u8;
-        let mut z_i = 0u32;
+        let mut u_i;
+        let mut z_i;
         let mut out = 0u32;
         let x_bits: Vec<u8> = bit_decomposition_u32(x);
         for i in 0..(N * 8) {
