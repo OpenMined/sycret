@@ -16,7 +16,7 @@ pub trait FSSKey: Sized {
 }
 
 pub trait RawKey: Sized {
-    const key_len: usize;
+    const KEY_LEN: usize;
 
     unsafe fn from_raw_line(raw_line_pointer: *const u8) -> Self;
 
@@ -55,14 +55,14 @@ pub fn generate_key_stream(
     for line_counter in 0..stream_length {
         if op_id == 0 {
             let (key_a, key_b) = EqKey::generate_keypair(&mut prg);
-            let key_len = EqKey::key_len;
+            let key_len = EqKey::KEY_LEN;
             unsafe {
                 &key_a.to_raw_line(key_a_p.add(key_len * line_counter));
                 &key_b.to_raw_line(key_b_p.add(key_len * line_counter));
             }
         } else {
             let (key_a, key_b) = LeKey::generate_keypair(&mut prg);
-            let key_len = LeKey::key_len;
+            let key_len = LeKey::KEY_LEN;
             unsafe {
                 &key_a.to_raw_line(key_a_p.add(key_len * line_counter));
                 &key_b.to_raw_line(key_b_p.add(key_len * line_counter));
@@ -99,11 +99,11 @@ pub fn eval_key_stream(
             let x: u32 = u32::from_le_bytes(*x_ptr);
 
             if op_id == 0 {
-                let key = EqKey::from_raw_line(key_pointer_p.add(EqKey::key_len * line_counter));
+                let key = EqKey::from_raw_line(key_pointer_p.add(EqKey::KEY_LEN * line_counter));
                 let result: u32 = key.eval(&mut prg, party_id, x);
                 *(result_ptr_p.add(line_counter)) = result as i64;
             } else {
-                let key = LeKey::from_raw_line(key_pointer_p.add(LeKey::key_len * line_counter));
+                let key = LeKey::from_raw_line(key_pointer_p.add(LeKey::KEY_LEN * line_counter));
                 let result: u32 = key.eval(&mut prg, party_id, x);
                 *(result_ptr_p.add(line_counter)) = result as i64;
             }

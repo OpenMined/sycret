@@ -38,22 +38,22 @@ const CW_LEN: usize = 24;
 
 impl RawKey for LeKey {
     // 4 + 16 + 24 * (4 * 8) + 4 * (4 * 8 + 1)
-    const key_len: usize = 920;
+    const KEY_LEN: usize = 920;
 
     unsafe fn to_raw_line(&self, key_pointer: *mut u8) {
         // Cast the output line to a raw pointer.
-        let out_ptr: *mut [u8; Self::key_len] =
-            slice::from_raw_parts_mut(key_pointer, Self::key_len).as_mut_ptr()
-                as *mut [u8; LeKey::key_len];
+        let out_ptr: *mut [u8; Self::KEY_LEN] =
+            slice::from_raw_parts_mut(key_pointer, Self::KEY_LEN).as_mut_ptr()
+                as *mut [u8; LeKey::KEY_LEN];
         // Get a mutable reference.
-        let out_ref: &mut [u8; Self::key_len] = &mut *out_ptr;
+        let out_ref: &mut [u8; Self::KEY_LEN] = &mut *out_ptr;
         // Write the key.
         write_key_to_array(&self, out_ref);
     }
 
     unsafe fn from_raw_line(key_pointer: *const u8) -> Self {
-        let key_ptr = slice::from_raw_parts(key_pointer, Self::key_len).as_ptr()
-            as *const [u8; Self::key_len];
+        let key_ptr = slice::from_raw_parts(key_pointer, Self::KEY_LEN).as_ptr()
+            as *const [u8; Self::KEY_LEN];
         read_key_from_array(&*key_ptr)
     }
 }
@@ -92,8 +92,8 @@ impl FSSKey for LeKey {
         assert!((party_id == 0u8) || (party_id == 1u8));
         let mut t_i: u8 = party_id;
         let mut s_i: u128 = self.s;
-        let mut u_i = 0u8;
-        let mut z_i = 0u32;
+        let mut u_i;
+        let mut z_i;
         let mut out = 0u32;
         let x_bits: Vec<u8> = bit_decomposition_u32(x);
         for i in 0..(N * 8) {
@@ -127,7 +127,7 @@ impl FSSKey for LeKey {
 /// Serialization functions
 ///
 
-fn write_key_to_array(key: &LeKey, array: &mut [u8; LeKey::key_len]) {
+fn write_key_to_array(key: &LeKey, array: &mut [u8; LeKey::KEY_LEN]) {
     array[0..N].copy_from_slice(&key.alpha_share.to_le_bytes());
     array[N..(N + L)].copy_from_slice(&key.s.to_le_bytes());
     for i in 0..(N * 8) {
@@ -152,7 +152,7 @@ fn write_key_to_array(key: &LeKey, array: &mut [u8; LeKey::key_len]) {
     }
 }
 
-fn read_key_from_array(array: &[u8; LeKey::key_len]) -> LeKey {
+fn read_key_from_array(array: &[u8; LeKey::KEY_LEN]) -> LeKey {
     let alpha_share = u32::from_le_bytes(array[0..N].try_into().unwrap());
     let s = u128::from_le_bytes(array[N..(N + L)].try_into().unwrap());
 
