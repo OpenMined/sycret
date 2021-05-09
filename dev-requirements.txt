@@ -160,7 +160,6 @@ Unidecode==1.1.1
 unify==0.5
 untokenize==0.1.1
 urllib3==1.25.9
-virtualenv==20.0.27
 wcwidth==0.2.5
 webencodings==0.5.1
 websocket-client==0.57.0
