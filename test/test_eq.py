@@ -14,10 +14,7 @@ def test_simple_raw_eq():
 
     for _ in range(16):
         keys_a, keys_b = eq.keygen(1)
-
-        alpha_a = np.frombuffer(keys_a[0][0 : eq.N], dtype=np.uint32)
-        alpha_b = np.frombuffer(keys_b[0][0 : eq.N], dtype=np.uint32)
-        alpha = alpha_a + alpha_b
+        alpha = eq.alpha(keys_a, keys_b)
 
         x = alpha.astype(np.int64)
 
@@ -44,13 +41,7 @@ def test_multiline(n_values, n_loops=16):
         keys_a, keys_b = eq.keygen(n_values)
 
         # Reshape to a C-contiguous array (necessary for from_buffer)
-        alpha_a = np.frombuffer(
-            np.ascontiguousarray(keys_a[:, 0 : eq.N]), dtype=np.uint32
-        )
-        alpha_b = np.frombuffer(
-            np.ascontiguousarray(keys_b[:, 0 : eq.N]), dtype=np.uint32
-        )
-        alpha = alpha_a + alpha_b
+        alpha = eq.alpha(keys_a, keys_b)
 
         x = alpha.astype(np.int64)
 

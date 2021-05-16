@@ -45,6 +45,7 @@ interrogate==1.2.0
 ipykernel==5.3.2
 ipython==7.16.1
 ipython-genutils==0.2.0
+isort==5.8.0
 itsdangerous==2.0.0a1
 jedi==0.17.1
 jeepney==0.4.3

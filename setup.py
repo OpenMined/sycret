@@ -1,7 +1,9 @@
+# stdlib
+from pathlib import Path
+
 # third party
 from setuptools import find_packages
 from setuptools import setup
-from pathlib import Path
 
 setup_dir = Path(__file__).resolve().parent
 
