@@ -9,16 +9,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
+      # - uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.8.10
       # - run: pip install numpy cffi
-      - run: sudo apt-get update
-      - run: python -m pip install --upgrade pip
-      - run: pip install virtualenv
-      - run: virtualenv venv
-      - run: source venv/bin/activate
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: "3.8"
+      # - run: sudo apt-get update
+      # - run: python -m pip install --upgrade pip
+      # - run: pip install virtualenv
+      # - run: virtualenv venv
+      # - run: source venv/bin/activate
       - run: pip install -r dev-requirements.txt
-      - run: pip install mkdocs-material mkdocstrings
       - run: maturin develop -b cffi --release
       - run: mkdocs gh-deploy --force

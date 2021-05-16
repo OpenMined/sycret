@@ -18,6 +18,6 @@ setup(
     long_description_content_type="text/markdown",
     license="Apache-2.0",
     python_requires=">=3.6",
-    install_requires=["numpy"],
+    install_requires=["numpy>=1", "cffi>=1", "pycparser>=2"],
     packages=find_packages(),
 )
