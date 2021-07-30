@@ -18,7 +18,7 @@ on:
 jobs:
   python-tests:
     strategy:
-      max-parallel: 9
+      max-parallel: 3
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.7, 3.8, 3.9]
@@ -32,20 +32,18 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Install build tools
+        shell: bash -l {0}
         run: |
-          sudo apt-get update
-          python -m pip install --upgrade pip
-          pip install virtualenv
-          virtualenv venv
-          source venv/bin/activate
           pip install -r dev-requirements.txt
           maturin develop -b cffi --release
       - name: Lint, format, and type-check
+        shell: bash -l {0}
         run: |
           # Stop the build if there are Python syntax errors or undefined names
-          source venv/bin/activate
           flake8 --config=.flake8 --exclude=./sycret/sycret/,./venv/ .
           black --check . --exclude '/sycret/sycret/*'
           isort --check-only . -s sycret/sycret/ -s venv/
@@ -53,14 +51,14 @@ jobs:
           # Once all existing type errors are addressed, the `|| echo` after the mypy call can be removed.
           mypy sycret || echo "Type errors found, continuing build..."
       - name: Check docstring coverage
+        shell: bash -l {0}
         run: |
-          source venv/bin/activate
           interrogate -mvp sycret/ -f 33.0
       - name: Scan for security issues
+        shell: bash -l {0}
         run: |
-          source venv/bin/activate
           bandit -r sycret -ll
       - name: Run tests
+        shell: bash -l {0}
         run: |
-          source venv/bin/activate
           pytest test
