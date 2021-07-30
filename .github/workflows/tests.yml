@@ -65,7 +65,7 @@ jobs:
 
       - name: Scan for security issues
         run: |
-          bandit -r src
+          bandit -r sycret
           safety check
 
       - name: Run tests
