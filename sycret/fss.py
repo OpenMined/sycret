@@ -115,6 +115,28 @@ class FSSFactory:
         )
         return results
 
+    def alpha(self, keys_a: np.array, keys_b: np.array) -> np.array:
+        """Calculate the alpha value of the given key.
+
+        Arguments:
+            keys_a: Values of the first piece of the key
+            keys_b: Values of the second piece of the key
+
+        Returns:
+            Alpha values in an array
+        """
+        key_values = (
+            lambda self, key: key[0][0 : self.N]
+            if key.shape[0] == 1
+            else np.ascontiguousarray(key[:, 0 : self.N])
+        )
+
+        alpha_a = np.frombuffer(key_values(self, keys_a), dtype=np.uint32)
+        alpha_b = np.frombuffer(key_values(self, keys_b), dtype=np.uint32)
+        alpha = alpha_a + alpha_b
+
+        return alpha
+
 
 class EqFactory(FSSFactory):
     """Distributed Point Function."""

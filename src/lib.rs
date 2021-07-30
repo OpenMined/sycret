@@ -82,10 +82,9 @@ pub unsafe extern "C" fn keygen(
     };
 
     // Force Rayon to use the number of thread provided by the user, unless a pool already exists
-    rayon::ThreadPoolBuilder::new()
+    let _ = rayon::ThreadPoolBuilder::new()
         .num_threads(n_threads)
-        .build_global()
-        .expect("A pool already exists");
+        .build_global();
     key_stream_args.par_iter().for_each(create_keypair);
 }
 
@@ -154,9 +153,8 @@ pub unsafe extern "C" fn eval(
     };
 
     // Force Rayon to use the number of thread provided by the user, unless a pool already exists
-    rayon::ThreadPoolBuilder::new()
+    let _ = rayon::ThreadPoolBuilder::new()
         .num_threads(n_threads)
-        .build_global()
-        .expect("A pool already exists");
+        .build_global();
     key_stream_args.par_iter().for_each(eval_key);
 }
