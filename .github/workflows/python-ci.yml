@@ -31,15 +31,28 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-
+      - name: Upgrade pip
+        run: |
+          pip install --upgrade --user pip
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+      - name: pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ hashFiles('**/dev-requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-py${{ matrix.python-version }}-
+      - name: Install dependencies
+        run: |
+          hash -r
+          pip install -r requirements.dev.txt -f https://download.pytorch.org/whl/torch_stable.html
+          pip install -e .
+        shell: bash
       - name: Install build tools
         run: |
-          sudo apt-get update
-          python -m pip install --upgrade pip
-          pip install virtualenv
-          virtualenv venv
-          source venv/bin/activate
-          pip install -r dev-requirements.txt
           maturin develop -b cffi --release
       - name: Lint, format, and type-check
         run: |
