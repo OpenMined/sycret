@@ -45,19 +45,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
-          key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ hashFiles('**/dev-requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-py${{ matrix.python-version }}-
-      - name: Install CPU Torch
-        if: runner.os != 'macos'
-        run: |
-          pip install torch==1.8.1+cpu torchvision==0.9.1+cpu torchcsprng==0.2.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
-        shell: bash
       - name: Install dependencies
         run: |
           hash -r
-          pip install -r dev-requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
-          pip install -e .
+          pip install sycret
+          pip install -r dev-requirements.txt
         shell: bash
       - id: file_changes # get changed files.
         uses: jitterbit/get-changed-files@v1
@@ -67,10 +62,6 @@ jobs:
       - uses: pre-commit/action@v2.0.0
         with:
           extra_args: --files ${{ steps.file_changes.outputs.all }} # apply only to changed files.
-
-      - name: Check docstring coverage
-        run: |
-          interrogate -mvp src/ -f 80
 
       - name: Scan for security issues
         run: |
