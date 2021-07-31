@@ -1,6 +1,6 @@
 use aes::cipher::generic_array::GenericArray;
 use aes::Aes128;
-use aes::{BlockCipher, BlockEncrypt, NewBlockCipher};
+use aes::{BlockEncrypt, NewBlockCipher};
 use std::slice;
 
 use super::stream::PRG;
