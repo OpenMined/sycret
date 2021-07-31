@@ -1,6 +1,6 @@
-use aesni::cipher::generic_array::GenericArray;
-use aesni::cipher::{BlockCipher, NewBlockCipher};
-use aesni::Aes128;
+use aes::cipher::generic_array::GenericArray;
+use aes::Aes128;
+use aes::{BlockCipher, BlockEncrypt, NewBlockCipher};
 use std::slice;
 
 use super::stream::PRG;
@@ -61,7 +61,7 @@ impl PRG for MMO {
     fn from_slice(aes_keys: &[u128]) -> MMO {
         let mut ciphers = vec![];
         for key in aes_keys {
-            ciphers.push(aesni::Aes128::new(GenericArray::from_slice(
+            ciphers.push(aes::Aes128::new(GenericArray::from_slice(
                 &key.to_le_bytes(),
             )));
         }
@@ -74,7 +74,7 @@ impl PRG for MMO {
     fn from_vec(aes_keys: &Vec<u128>) -> MMO {
         let mut ciphers = vec![];
         for key in aes_keys {
-            ciphers.push(aesni::Aes128::new(GenericArray::from_slice(
+            ciphers.push(aes::Aes128::new(GenericArray::from_slice(
                 &key.to_le_bytes(),
             )));
         }
