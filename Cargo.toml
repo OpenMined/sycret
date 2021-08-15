@@ -21,6 +21,11 @@ criterion = "0.3"
 name = "bench_eq"
 harness = false
 
+[[bench]]
+name = "bench_le"
+harness = false
+
+
 [lib]
 name = "sycret"
 crate-type = ["cdylib", "rlib"]
