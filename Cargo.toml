@@ -29,6 +29,7 @@ harness = false
 [lib]
 name = "sycret"
 crate-type = ["cdylib", "rlib"]
+bench = false
 
 [package.metadata.maturin]
 maintainer = "Pierre Tholoniat"
