@@ -1,0 +1,12 @@
+name: Rust benchmarks
+
+on: [pull_request]
+jobs:
+  runBenchmark:
+    name: run benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jasonwilliams/criterion-compare-action@move_to_actions
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
