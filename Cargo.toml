@@ -25,6 +25,10 @@ harness = false
 name = "bench_le"
 harness = false
 
+[[bench]]
+name = "batch"
+harness = false
+
 
 [lib]
 name = "sycret"
