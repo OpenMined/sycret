@@ -44,5 +44,39 @@ pub fn le_eval(c: &mut Criterion) {
     });
 }
 
-criterion_group!(bench_le, le_keygen, le_eval, le_batch_keygen);
+pub fn le_batch_eval(c: &mut Criterion) {
+    let mut keys_a: Vec<u8> = Vec::with_capacity(4600);
+    let mut keys_b: Vec<u8> = Vec::with_capacity(4600);
+    let keys_a_pointer: *mut u8 = keys_a.as_mut_ptr();
+    let keys_b_pointer: *mut u8 = keys_b.as_mut_ptr();
+    let n_values: usize = 5;
+    let n_threads: usize = 6;
+    let op_id: usize = 1;
+    unsafe {
+        keygen(keys_a_pointer, keys_b_pointer, n_values, n_threads, op_id);
+    }
+    let party_id: usize = 0;
+    let xs: Vec<u8> = Vec::with_capacity(4600);
+    let xs_pointer: *const u8 = xs.as_ptr();
+    let keys_pointer: *const u8 = keys_a_pointer as *const u8;
+    let mut results: Vec<i64> = Vec::with_capacity(4600);
+    let results_pointer: *mut i64 = results.as_mut_ptr();
+    unsafe {
+        c.bench_function("Le batch eval", |b| {
+            b.iter(|| {
+                eval(
+                    party_id,
+                    xs_pointer,
+                    keys_pointer,
+                    results_pointer,
+                    n_values,
+                    n_threads,
+                    op_id,
+                )
+            })
+        });
+    }
+}
+
+criterion_group!(bench_le, le_keygen, le_eval, le_batch_keygen, le_batch_eval);
 criterion_main!(bench_le);
