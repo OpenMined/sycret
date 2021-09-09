@@ -17,6 +17,8 @@ pub fn le_keygen(c: &mut Criterion) {
 
 /// op_id = 1 implies Le key generation
 pub fn le_batch_keygen(c: &mut Criterion) {
+    // 4600 comes from multiplying the Le key length (920)
+    // by the number of values / n_values (5)
     let mut keys_a: Vec<u8> = Vec::with_capacity(4600);
     let mut keys_b: Vec<u8> = Vec::with_capacity(4600);
     let keys_a_pointer: *mut u8 = keys_a.as_mut_ptr();

@@ -17,6 +17,8 @@ pub fn eq_keygen(c: &mut Criterion) {
 
 /// op_id = 0 implies Eq key generation
 pub fn eq_batch_keygen(c: &mut Criterion) {
+    // 3105 comes from multiplying the Eq key length (621)
+    // by the number of values / n_values (5)
     let mut keys_a: Vec<u8> = Vec::with_capacity(3105);
     let mut keys_b: Vec<u8> = Vec::with_capacity(3105);
     let keys_a_pointer: *mut u8 = keys_a.as_mut_ptr();
@@ -45,6 +47,8 @@ pub fn eq_eval(c: &mut Criterion) {
 }
 
 pub fn eq_batch_eval(c: &mut Criterion) {
+    // 3105 comes from multiplying the Eq key length (621)
+    // by the number of values / n_values (5)
     let mut keys_a: Vec<u8> = Vec::with_capacity(3105);
     let mut keys_b: Vec<u8> = Vec::with_capacity(3105);
     let keys_a_pointer: *mut u8 = keys_a.as_mut_ptr();
