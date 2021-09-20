@@ -73,6 +73,7 @@ pub fn generate_key_stream(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn eval_key_stream(
     party_id: u8,
     aes_keys: &[u128],
