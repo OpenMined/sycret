@@ -34,6 +34,7 @@ pub fn bit_decomposition_u32(alpha: u32) -> Vec<u8> {
     alpha_bits
 }
 
+/// # Safety De-referencing raw pointer
 pub unsafe fn write_aes_key_to_raw_line(aes_key: u128, key_line_pointer: *mut u8) {
     // Cast the output line to a raw pointer.
     let out_ptr: *mut [u8; 16] =
@@ -44,6 +45,7 @@ pub unsafe fn write_aes_key_to_raw_line(aes_key: u128, key_line_pointer: *mut u8
     out_ref.copy_from_slice(&aes_key.to_le_bytes());
 }
 
+/// # Safety De-referencing raw pointer
 pub unsafe fn read_aes_key_from_raw_line(key_line_pointer: *const u8) -> u128 {
     let key_ptr: *const [u8; 16] =
         slice::from_raw_parts(key_line_pointer, 16).as_ptr() as *const [u8; 16];
