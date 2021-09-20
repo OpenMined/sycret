@@ -33,7 +33,7 @@ impl RawKey for EqKey {
         // Get a mutable reference.
         let out_ref: &mut [u8; Self::KEY_LEN] = &mut *out_ptr;
         // Write the key.
-        write_key_to_array(&self, out_ref);
+        write_key_to_array(self, out_ref);
     }
 
     unsafe fn from_raw_line(key_pointer: *const u8) -> Self {
