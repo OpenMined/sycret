@@ -8,7 +8,7 @@ use std::convert::TryInto;
 use std::slice;
 
 use crate::fss::dpf::{g, generate_cw_from_seeds};
-use crate::stream::{FSSKey, RawKey, PRG};
+use crate::stream::{FSSKey, Prg, RawKey};
 use crate::utils::{bit_decomposition_u32, compute_out};
 use crate::{L, N};
 
@@ -44,7 +44,7 @@ impl RawKey for EqKey {
 }
 
 impl FSSKey for EqKey {
-    fn generate_keypair(prg: &mut impl PRG) -> (Self, Self) {
+    fn generate_keypair(prg: &mut impl Prg) -> (Self, Self) {
         // Thread randomness for parallelization.
         let mut rng = rand::thread_rng();
 
@@ -86,7 +86,7 @@ impl FSSKey for EqKey {
         )
     }
 
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32 {
+    fn eval(&self, prg: &mut impl Prg, party_id: u8, x: u32) -> u32 {
         // Initialize the control bit and the seed.
         assert!((party_id == 0u8) || (party_id == 1u8));
         let mut t_i: u8 = party_id;

@@ -2,7 +2,7 @@
 //! DPF implementations
 //!
 
-use crate::stream::PRG;
+use crate::stream::Prg;
 use crate::utils::{bit_decomposition_u32, compute_out, share_leaf};
 use crate::{L, N};
 use rand::Rng;
@@ -11,7 +11,7 @@ use rand::Rng;
 /// Deterministic function
 ///
 pub fn generate_cw_from_seeds(
-    prg: &mut impl PRG,
+    prg: &mut impl Prg,
     alpha: u32,
     s_a: u128,
     s_b: u128,
@@ -81,9 +81,9 @@ pub fn generate_cw_from_seeds(
 }
 
 ///
-/// Wrapper around a PRG with expansion factor 2
+/// Wrapper around a Prg with expansion factor 2
 ///
-pub fn g(prg: &mut impl PRG, seed: u128) -> (u128, u8, u128, u8) {
+pub fn g(prg: &mut impl Prg, seed: u128) -> (u128, u8, u128, u8) {
     assert_eq!(L, 128 / 8);
 
     let out = prg.expand(seed);
@@ -107,13 +107,13 @@ pub struct DPFKeyAlpha1 {
 }
 
 pub trait DPFKey1: Sized {
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
+    fn eval(&self, prg: &mut impl Prg, party_id: u8, x: u32) -> u32;
 
-    fn generate_keypair(prg: &mut impl PRG, alpha: u32) -> (Self, Self);
+    fn generate_keypair(prg: &mut impl Prg, alpha: u32) -> (Self, Self);
 }
 
 impl DPFKey1 for DPFKeyAlpha1 {
-    fn generate_keypair(prg: &mut impl PRG, alpha: u32) -> (Self, Self) {
+    fn generate_keypair(prg: &mut impl Prg, alpha: u32) -> (Self, Self) {
         // Thread randomness for parallelization.
         let mut rng = rand::thread_rng();
 
@@ -147,7 +147,7 @@ impl DPFKey1 for DPFKeyAlpha1 {
         )
     }
 
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32 {
+    fn eval(&self, prg: &mut impl Prg, party_id: u8, x: u32) -> u32 {
         // Initialize the control bit and the seed.
         assert!((party_id == 0u8) || (party_id == 1u8));
         let mut t_i: u8 = party_id;

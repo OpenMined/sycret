@@ -2,8 +2,8 @@ use rand::Rng;
 
 extern crate sycret;
 use sycret::fss::dif::*;
-use sycret::stream::{FSSKey, PRG};
-use sycret::utils::MMO;
+use sycret::stream::{FSSKey, Prg};
+use sycret::utils::Mmo;
 
 #[test]
 fn generate_and_evaluate_alpha() {
@@ -12,7 +12,7 @@ fn generate_and_evaluate_alpha() {
     for _ in 0..16 {
         let alpha: u32 = rng.gen();
         let aes_keys: [u128; 4] = rng.gen();
-        let mut prg = MMO::from_slice(&aes_keys);
+        let mut prg = Mmo::from_slice(&aes_keys);
         let (k_a, k_b) = DIFKeyAlpha1::generate_keypair(&mut prg, alpha);
 
         // Evaluate separately on the same input.
@@ -31,7 +31,7 @@ fn generate_and_evaluate_le_alpha() {
     for _ in 0..16 {
         let alpha: u32 = rng.gen();
         let aes_keys: [u128; 4] = rng.gen();
-        let mut prg = MMO::from_slice(&aes_keys);
+        let mut prg = Mmo::from_slice(&aes_keys);
         let (k_a, k_b) = DIFKeyAlpha1::generate_keypair(&mut prg, alpha);
 
         let not_alpha: u32 = alpha.wrapping_sub(rng.gen::<u32>());
@@ -53,7 +53,7 @@ fn generate_and_evaluate_strictly_greater_than_alpha() {
     for _ in 0..16 {
         let alpha: u32 = rng.gen();
         let aes_keys: [u128; 4] = rng.gen();
-        let mut prg = MMO::from_slice(&aes_keys);
+        let mut prg = Mmo::from_slice(&aes_keys);
         let (k_a, k_b) = DIFKeyAlpha1::generate_keypair(&mut prg, alpha);
 
         let not_alpha: u32 = alpha.wrapping_add(rng.gen::<u32>());

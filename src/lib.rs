@@ -36,7 +36,7 @@ pub unsafe extern "C" fn keygen(
 
     let (n_aes_keys, keylen, n_aes_streams) = build_params(op_id);
 
-    // Harcoded AES-128 keys for MMO
+    // Harcoded AES-128 keys for Mmo
     let mut aes_keys = Vec::new();
     for i in 0..n_aes_keys {
         aes_keys.push(i as u128);
@@ -104,7 +104,7 @@ pub unsafe extern "C" fn eval(
 
     let (n_aes_keys, keylen, n_aes_streams) = build_params(op_id);
 
-    // Harcoded AES-128 keys for MMO
+    // Harcoded AES-128 keys for Mmo
     let mut aes_keys = Vec::new();
     for i in 0..n_aes_keys {
         aes_keys.push(i as u128);

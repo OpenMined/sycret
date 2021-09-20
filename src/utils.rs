@@ -3,7 +3,7 @@ use aesni::cipher::{BlockCipher, NewBlockCipher};
 use aesni::Aes128;
 use std::slice;
 
-use super::stream::PRG;
+use super::stream::Prg;
 use super::L;
 
 pub fn share_leaf(mask_a: u32, mask_b: u32, share_bit: u8, flip_bit: u8) -> u32 {
@@ -51,34 +51,34 @@ pub unsafe fn read_aes_key_from_raw_line(key_line_pointer: *const u8) -> u128 {
     key
 }
 
-pub struct MMO {
+pub struct Mmo {
     // pub expansion_factor: usize,
     pub ciphers: Vec<Aes128>,
 }
 
 // TODO: hardcode the default keys
-impl PRG for MMO {
-    fn from_slice(aes_keys: &[u128]) -> MMO {
+impl Prg for Mmo {
+    fn from_slice(aes_keys: &[u128]) -> Mmo {
         let mut ciphers = vec![];
         for key in aes_keys {
             ciphers.push(aesni::Aes128::new(GenericArray::from_slice(
                 &key.to_le_bytes(),
             )));
         }
-        MMO {
+        Mmo {
             // expansion_factor: ciphers.len(),
             ciphers,
         }
     }
 
-    fn from_vec(aes_keys: &Vec<u128>) -> MMO {
+    fn from_vec(aes_keys: &Vec<u128>) -> Mmo {
         let mut ciphers = vec![];
         for key in aes_keys {
             ciphers.push(aesni::Aes128::new(GenericArray::from_slice(
                 &key.to_le_bytes(),
             )));
         }
-        MMO {
+        Mmo {
             // expansion_factor: ciphers.len(),
             ciphers,
         }
