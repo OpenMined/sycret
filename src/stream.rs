@@ -29,7 +29,7 @@ pub trait RawKey: Sized {
 pub trait Prg {
     fn from_slice(key: &[u128]) -> Self;
 
-    fn from_vec(key: &Vec<u128>) -> Self;
+    fn from_vec(key: &[u128]) -> Self;
 
     // NOTE: Rust Stable does not have const generics
     // const expansion_factor: usize;
@@ -40,7 +40,7 @@ pub trait Prg {
 }
 
 pub fn generate_key_stream(
-    aes_keys: &Vec<u128>,
+    aes_keys: &[u128],
     _stream_id: usize,
     stream_length: usize,
     key_a_pointer: usize,
@@ -75,7 +75,7 @@ pub fn generate_key_stream(
 
 pub fn eval_key_stream(
     party_id: u8,
-    aes_keys: &Vec<u128>,
+    aes_keys: &[u128],
     _stream_id: usize,
     stream_length: usize,
     x_pointer: usize,

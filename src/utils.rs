@@ -73,7 +73,7 @@ impl Prg for Mmo {
         }
     }
 
-    fn from_vec(aes_keys: &Vec<u128>) -> Mmo {
+    fn from_vec(aes_keys: &[u128]) -> Mmo {
         let mut ciphers = vec![];
         for key in aes_keys {
             ciphers.push(aesni::Aes128::new(GenericArray::from_slice(
