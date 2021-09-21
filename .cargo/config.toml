@@ -1,2 +1,0 @@
-[build]
-rustflags = ["--emit=asm", "-C", "target-feature=+aes,+ssse3"]
