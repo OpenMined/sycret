@@ -57,15 +57,15 @@ pub fn generate_key_stream(
             let (key_a, key_b) = EqKey::generate_keypair(&mut prg);
             let key_len = EqKey::KEY_LEN;
             unsafe {
-                &key_a.to_raw_line(key_a_p.add(key_len * line_counter));
-                &key_b.to_raw_line(key_b_p.add(key_len * line_counter));
+                key_a.to_raw_line(key_a_p.add(key_len * line_counter));
+                key_b.to_raw_line(key_b_p.add(key_len * line_counter));
             }
         } else {
             let (key_a, key_b) = LeKey::generate_keypair(&mut prg);
             let key_len = LeKey::KEY_LEN;
             unsafe {
-                &key_a.to_raw_line(key_a_p.add(key_len * line_counter));
-                &key_b.to_raw_line(key_b_p.add(key_len * line_counter));
+                key_a.to_raw_line(key_a_p.add(key_len * line_counter));
+                key_b.to_raw_line(key_b_p.add(key_len * line_counter));
             }
         }
     }
