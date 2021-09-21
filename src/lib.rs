@@ -1,3 +1,5 @@
+#![allow(clippy::needless_range_loop)]
+
 use rayon::prelude::*;
 
 pub mod eq;
