@@ -42,7 +42,7 @@ fn generate_and_evaluate_not_alpha() {
         println!("alpha: {:?}, masked: {:?}", alpha, k_a.alpha_share);
 
         // Modify alpha: we should leave the special path.
-        alpha = alpha + 1;
+        alpha += 1;
         println!("alpha flipped: {}", alpha);
 
         // Evaluate separately on the same input.

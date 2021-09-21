@@ -17,9 +17,9 @@ fn eval_on_alpha_with_offset(offset: i32) -> (u32, u32) {
 
     // Add some offset
     if offset > 0 {
-        alpha = alpha + offset as u32;
+        alpha += offset as u32;
     } else {
-        alpha = alpha - (-offset as u32);
+        alpha -= -offset as u32;
     }
 
     // Clean ciphers
