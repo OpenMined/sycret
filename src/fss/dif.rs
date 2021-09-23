@@ -2,7 +2,7 @@
 //! DIF implementation
 //!
 
-use crate::stream::PRG;
+use crate::stream::Prg;
 use crate::utils::{bit_decomposition_u32, compute_out, share_leaf};
 use crate::{L, N};
 use rand::Rng;
@@ -38,13 +38,13 @@ pub struct DIFKeyAlpha1 {
 }
 
 pub trait DIFKey1: Sized {
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
+    fn eval(&self, prg: &mut impl Prg, party_id: u8, x: u32) -> u32;
 
-    fn generate_keypair(prg: &mut impl PRG, alpha: u32) -> (Self, Self);
+    fn generate_keypair(prg: &mut impl Prg, alpha: u32) -> (Self, Self);
 }
 
 impl DIFKey1 for DIFKeyAlpha1 {
-    fn generate_keypair(prg: &mut impl PRG, alpha: u32) -> (Self, Self) {
+    fn generate_keypair(prg: &mut impl Prg, alpha: u32) -> (Self, Self) {
         // Thread randomness for parallelization.
         let mut rng = rand::thread_rng();
 
@@ -69,7 +69,7 @@ impl DIFKey1 for DIFKeyAlpha1 {
         )
     }
 
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32 {
+    fn eval(&self, prg: &mut impl Prg, party_id: u8, x: u32) -> u32 {
         assert!((party_id == 0u8) || (party_id == 1u8));
         let mut t_i: u8 = party_id;
         let mut s_i: u128 = self.s;
@@ -104,7 +104,7 @@ impl DIFKey1 for DIFKeyAlpha1 {
     }
 }
 
-pub fn h(prg: &mut impl PRG, seed: u128) -> CorrectionWord {
+pub fn h(prg: &mut impl Prg, seed: u128) -> CorrectionWord {
     assert_eq!(L, 128 / 8);
 
     let out = prg.expand(seed);
@@ -135,7 +135,7 @@ pub fn h(prg: &mut impl PRG, seed: u128) -> CorrectionWord {
 
 /// Internal deterministic function.
 pub fn generate_cw_from_seeds(
-    prg: &mut impl PRG,
+    prg: &mut impl Prg,
     alpha: u32,
     s_a: u128,
     s_b: u128,

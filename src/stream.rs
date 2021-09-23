@@ -6,28 +6,30 @@ use std::slice;
 
 use crate::eq::EqKey;
 use crate::le::LeKey;
-use crate::utils::MMO;
+use crate::utils::Mmo;
 use crate::N;
 
 pub trait FSSKey: Sized {
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32;
+    fn eval(&self, prg: &mut impl Prg, party_id: u8, x: u32) -> u32;
 
-    fn generate_keypair(prg: &mut impl PRG) -> (Self, Self);
+    fn generate_keypair(prg: &mut impl Prg) -> (Self, Self);
 }
 
 pub trait RawKey: Sized {
     const KEY_LEN: usize;
 
+    /// # Safety De-referencing raw pointer
     unsafe fn from_raw_line(raw_line_pointer: *const u8) -> Self;
 
+    /// # Safety De-referencing raw pointer
     unsafe fn to_raw_line(&self, raw_line_pointer: *mut u8);
 }
 
-// Keyed PRG
-pub trait PRG {
+// Keyed Prg
+pub trait Prg {
     fn from_slice(key: &[u128]) -> Self;
 
-    fn from_vec(key: &Vec<u128>) -> Self;
+    fn from_vec(key: &[u128]) -> Self;
 
     // NOTE: Rust Stable does not have const generics
     // const expansion_factor: usize;
@@ -38,7 +40,7 @@ pub trait PRG {
 }
 
 pub fn generate_key_stream(
-    aes_keys: &Vec<u128>,
+    aes_keys: &[u128],
     _stream_id: usize,
     stream_length: usize,
     key_a_pointer: usize,
@@ -49,8 +51,8 @@ pub fn generate_key_stream(
     let key_a_p = key_a_pointer as *mut u8;
     let key_b_p = key_b_pointer as *mut u8;
 
-    // TODO: def. Impl PRG.
-    let mut prg = MMO::from_vec(aes_keys);
+    // TODO: def. Impl Prg.
+    let mut prg = Mmo::from_vec(aes_keys);
 
     for line_counter in 0..stream_length {
         if op_id == 0 {
@@ -71,9 +73,10 @@ pub fn generate_key_stream(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn eval_key_stream(
     party_id: u8,
-    aes_keys: &Vec<u128>,
+    aes_keys: &[u128],
     _stream_id: usize,
     stream_length: usize,
     x_pointer: usize,
@@ -83,7 +86,7 @@ pub fn eval_key_stream(
 ) {
     assert!((party_id == 0u8) || (party_id == 1u8));
 
-    let mut prg = MMO::from_vec(aes_keys);
+    let mut prg = Mmo::from_vec(aes_keys);
 
     // Read, eval, write line by line
 

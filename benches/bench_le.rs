@@ -2,14 +2,14 @@ use rand::Rng;
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use sycret::le::*;
-use sycret::stream::{FSSKey, PRG};
-use sycret::utils::MMO;
+use sycret::stream::{FSSKey, Prg};
+use sycret::utils::Mmo;
 use sycret::{eval, keygen};
 
 pub fn le_keygen(c: &mut Criterion) {
     let mut rng = rand::thread_rng();
     let aes_keys: [u128; 4] = rng.gen();
-    let mut prg = MMO::from_slice(&aes_keys);
+    let mut prg = Mmo::from_slice(&aes_keys);
     c.bench_function("Le keygen", |b| {
         b.iter(|| LeKey::generate_keypair(black_box(&mut prg)))
     });
@@ -51,7 +51,7 @@ pub fn le_batch_keygen(c: &mut Criterion) {
 pub fn le_eval(c: &mut Criterion) {
     let mut rng = rand::thread_rng();
     let aes_keys: [u128; 4] = rng.gen();
-    let mut prg = MMO::from_slice(&aes_keys);
+    let mut prg = Mmo::from_slice(&aes_keys);
 
     let (k_a, k_b) = LeKey::generate_keypair(&mut prg);
     let alpha = k_a.alpha_share.wrapping_add(k_b.alpha_share);

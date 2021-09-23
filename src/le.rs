@@ -11,7 +11,7 @@ use std::slice;
 use crate::fss::dif::{
     decompress_word, generate_cw_from_seeds, h, xor_2_words, CompressedCorrectionWord,
 };
-use crate::stream::{FSSKey, RawKey, PRG};
+use crate::stream::{FSSKey, Prg, RawKey};
 use crate::utils::{bit_decomposition_u32, compute_out};
 use crate::{L, N};
 
@@ -48,7 +48,7 @@ impl RawKey for LeKey {
         // Get a mutable reference.
         let out_ref: &mut [u8; Self::KEY_LEN] = &mut *out_ptr;
         // Write the key.
-        write_key_to_array(&self, out_ref);
+        write_key_to_array(self, out_ref);
     }
 
     unsafe fn from_raw_line(key_pointer: *const u8) -> Self {
@@ -59,7 +59,7 @@ impl RawKey for LeKey {
 }
 
 impl FSSKey for LeKey {
-    fn generate_keypair(prg: &mut impl PRG) -> (Self, Self) {
+    fn generate_keypair(prg: &mut impl Prg) -> (Self, Self) {
         // Thread randomness for parallelization.
         let mut rng = rand::thread_rng();
         // TODO: we can replace this randomness by AES-generated randomness and reduce the key size.
@@ -88,7 +88,7 @@ impl FSSKey for LeKey {
         )
     }
 
-    fn eval(&self, prg: &mut impl PRG, party_id: u8, x: u32) -> u32 {
+    fn eval(&self, prg: &mut impl Prg, party_id: u8, x: u32) -> u32 {
         assert!((party_id == 0u8) || (party_id == 1u8));
         let mut t_i: u8 = party_id;
         let mut s_i: u128 = self.s;

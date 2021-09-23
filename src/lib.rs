@@ -1,3 +1,5 @@
+#![allow(clippy::needless_range_loop)]
+
 use rayon::prelude::*;
 
 pub mod eq;
@@ -23,6 +25,7 @@ fn build_params(op_id: usize) -> (usize, usize, usize) {
     (n_aes_keys, keylen, n_aes_streams)
 }
 
+/// # Safety Declare function to be used within C
 #[no_mangle]
 pub unsafe extern "C" fn keygen(
     keys_a_pointer: *mut u8,
@@ -36,7 +39,7 @@ pub unsafe extern "C" fn keygen(
 
     let (n_aes_keys, keylen, n_aes_streams) = build_params(op_id);
 
-    // Harcoded AES-128 keys for MMO
+    // Harcoded AES-128 keys for Mmo
     let mut aes_keys = Vec::new();
     for i in 0..n_aes_keys {
         aes_keys.push(i as u128);
@@ -88,6 +91,7 @@ pub unsafe extern "C" fn keygen(
     key_stream_args.par_iter().for_each(create_keypair);
 }
 
+/// # Safety Declare function to be used within C
 #[no_mangle]
 pub unsafe extern "C" fn eval(
     party_id: usize,
@@ -104,7 +108,7 @@ pub unsafe extern "C" fn eval(
 
     let (n_aes_keys, keylen, n_aes_streams) = build_params(op_id);
 
-    // Harcoded AES-128 keys for MMO
+    // Harcoded AES-128 keys for Mmo
     let mut aes_keys = Vec::new();
     for i in 0..n_aes_keys {
         aes_keys.push(i as u128);
