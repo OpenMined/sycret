@@ -25,7 +25,8 @@ fn build_params(op_id: usize) -> (usize, usize, usize) {
     (n_aes_keys, keylen, n_aes_streams)
 }
 
-/// # Safety Declare function to be used within C
+/// # Safety
+/// Declare function to be used within C
 #[no_mangle]
 pub unsafe extern "C" fn keygen(
     keys_a_pointer: *mut u8,
@@ -91,7 +92,8 @@ pub unsafe extern "C" fn keygen(
     key_stream_args.par_iter().for_each(create_keypair);
 }
 
-/// # Safety Declare function to be used within C
+/// # Safety
+/// Declare function to be used within C
 #[no_mangle]
 pub unsafe extern "C" fn eval(
     party_id: usize,
