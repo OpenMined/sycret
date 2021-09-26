@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [tool.maturin]
 bindings = "cffi"
-manylinux = "2010"
+compatibility = "linux"
 
 [tool.isort]
 multi_line_output = 3
