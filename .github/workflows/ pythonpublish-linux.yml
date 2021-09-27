@@ -30,7 +30,7 @@ jobs:
       - name: maturin build
         run: |
           pip install --upgrade pip
-          pip install --no-cache-dir cffi maturin
+          pip install --no-cache-dir cffi maturin==0.8.2
           maturin build -b cffi --release
       - name: Publish with Maturin
         run: maturin publish -b cffi --no-sdist -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
