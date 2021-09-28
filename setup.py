@@ -9,7 +9,7 @@ setup_dir = Path(__file__).resolve().parent
 
 setup(
     name="sycret",
-    version="0.1.3",
+    version="0.2.1",
     author="Pierre Tholoniat",
     author_email="pierre@tholoniat.com",
     url="https://github.com/OpenMined/sycret",
