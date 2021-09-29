@@ -7,12 +7,18 @@ on:
       - main
     paths:
       - "**.py"
+      - "**.rs"
+      - "**.toml"
+      - "dev-requirements.yaml"
       - ".github/workflows/python-ci.yml"
 
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
       - "**.py"
+      - "**.rs"
+      - "**.toml"
+      - "dev-requirements.yaml"
       - ".github/workflows/python-ci.yml"
 
 jobs:
