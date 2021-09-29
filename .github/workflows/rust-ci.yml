@@ -6,12 +6,14 @@ on:
       - master
     paths:
       - "**.rs"
+      - "Cargo.toml"
       - ".github/workflows/rust-ci.yml"
 
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
       - "**.rs"
+      - "Cargo.toml"
       - ".github/workflows/rust-ci.yml"
 
 jobs:
