@@ -9,7 +9,7 @@ homepage = ""
 readme = "README.md"
 
 [dependencies]
-maturin = "0.8.2"
+maturin = "0.11.4"
 aes = "0.7.4"
 rand = "0.7.3"
 rayon = "1.5.0"
