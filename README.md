@@ -36,6 +36,4 @@ The Python package is called from PySyft, like in [this branch](https://github.c
 
 ### Publish 
 
-```bash
-docker run --rm --env RUSTFLAGS="-C target-feature=+aes,+ssse3" -v $(pwd):/io konstin2/maturin publish -b cffi --manylinux 2010 -u __token__ -p pypi-your-token
-```
+See [docs/publish.md](https://github.com/OpenMined/sycret/blob/master/docs/publish.md) for details.
