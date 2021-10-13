@@ -36,4 +36,5 @@ maintainer = "Pierre Tholoniat"
 maintainer-email = "pierre@tholoniat.com"
 requires-dist = ["numpy>=1", "cffi>=1", "pycparser>=2"]
 requires-python=">=3.6"
+project-url = { "Homepage" = "https://github.com/OpenMined/sycret" }
 
