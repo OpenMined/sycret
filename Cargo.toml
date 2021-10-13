@@ -5,7 +5,6 @@ authors = ["Pierre Tholoniat"]
 edition = "2018"
 license = "Apache-2.0"
 repository = ""
-homepage = ""
 readme = "README.md"
 
 [dependencies]
