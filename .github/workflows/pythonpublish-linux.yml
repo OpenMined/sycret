@@ -9,16 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     container: konstin2/maturin
     steps:
+      - uses: actions/checkout@v1
       - name: Build wheel
-        uses: actions/checkout@v1
         run: |
           maturin publish -b cffi --no-sdist -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }} --manylinux 2014
   aarch-linux-wheels:
     runs-on: ubuntu-latest
     container: messense/manylinux_2_24-cross:aarch64
     steps:
+      - uses: actions/checkout@v1
       - name: Build wheel
-        uses: actions/checkout@v1
         run: |
           curl https://sh.rustup.rs -sSf | bash -s -- -y
           source $HOME/.cargo/env
