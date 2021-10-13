@@ -30,7 +30,7 @@ jobs:
           maturin build -b cffi --release
       - name: Publish with Maturin
         run: maturin publish -b cffi --no-sdist -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }}
-  aarch-build:
+  aarch-2014-build:
     runs-on: ubuntu-latest
     container: messense/manylinux_2_24-cross:aarch64
     steps:
@@ -40,5 +40,18 @@ jobs:
           curl https://sh.rustup.rs -sSf | bash -s -- -y
           . $HOME/.cargo/env
           rustup target add aarch64-unknown-linux-gnu
-          pip install cffi
+          pip install --no-cache-dir cffi
           maturin publish -b cffi --no-sdist -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }} --manylinux 2014
+  x86_64-2010-build:
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2010_x86_64
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build wheel
+        run: |
+          curl https://sh.rustup.rs -sSf | bash -s -- -y
+          . $HOME/.cargo/env
+          yum install -y rh-python36
+          scl enable rh-python36 bash
+          pip install --no-cache-dir cffi maturin==0.11.4
+          maturin publish -b cffi --no-sdist -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }} --manylinux 2010
