@@ -7,11 +7,14 @@ on:
 jobs:
   linux-wheels:
     runs-on: ubuntu-latest
-    container: konstin2/maturin
+    container: quay.io/pypa/manylinux2014_x86_64:latest
     steps:
       - uses: actions/checkout@v1
       - name: Build wheel
         run: |
+          curl https://sh.rustup.rs -sSf | bash -s -- -y
+          . $HOME/.cargo/env
+          pip install cffi
           maturin publish -b cffi --no-sdist -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }} --manylinux 2014
   aarch-linux-wheels:
     runs-on: ubuntu-latest
