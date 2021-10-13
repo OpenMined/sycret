@@ -21,9 +21,10 @@ jobs:
       - name: Build wheel
         run: |
           curl https://sh.rustup.rs -sSf | bash -s -- -y
-          source $HOME/.cargo/env
+          . $HOME/.cargo/env
           rustup target add aarch64-unknown-linux-gnu
-          maturin publish -b cffi --no-sdist -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }} --manylinux 2014
+          pip install cffi
+          cd /home/rust/src/ && maturin publish -b cffi --no-sdist -u ${{ secrets.PYPI_USERNAME }} -p ${{ secrets.PYPI_PASSWORD }} --manylinux 2014
   osx-wheels:
     runs-on: macos-latest
     steps:
