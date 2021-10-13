@@ -1,11 +1,9 @@
 [package]
 name = "sycret"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Pierre Tholoniat"]
 edition = "2018"
 license = "Apache-2.0"
-repository = ""
-homepage = ""
 readme = "README.md"
 
 [dependencies]
@@ -36,4 +34,5 @@ maintainer = "Pierre Tholoniat"
 maintainer-email = "pierre@tholoniat.com"
 requires-dist = ["numpy>=1", "cffi>=1", "pycparser>=2"]
 requires-python=">=3.6"
+project-url = { "Homepage" = "https://github.com/OpenMined/sycret" }
 
